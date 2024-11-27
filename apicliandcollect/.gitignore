@@ -34,3 +34,4 @@ build/
 
 HELP.md
 mvnw*
+application.properties
