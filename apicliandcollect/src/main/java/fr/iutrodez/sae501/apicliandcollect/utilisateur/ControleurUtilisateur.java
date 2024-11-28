@@ -28,8 +28,10 @@ public class ControleurUtilisateur {
     @Autowired
     private InterractionBdUtilisateur interractionBdUtilisateur;
 
-    private static final String MESSAGE_ERREUR = "Erreur lors de l'inscription";
+    private static final String MESSAGE_ERREUR = "Erreur interne au serveur";
     private static final String SUCCES_INSCRIPTION = "Utilisateur inscrit avec succès";
+    private static final String SUCCES_CONNEXION = "Utilisateur connecté avec succès";
+    private static final String ERREUR_CONNEXION = "Mail ou mot de passe incorrect";
 
     /**
      * Inscrit un nouvel utilisateur.
@@ -55,7 +57,28 @@ public class ControleurUtilisateur {
         Map <String, String> reponse = new HashMap<>();
         reponse.put("message", SUCCES_INSCRIPTION);
         reponse.put("token", token);
-        return new ResponseEntity<>(reponse, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(reponse, HttpStatus.OK);
+    }
+
+    /**
+     * Authentifie un utilisateur.
+     * @param mail: le mail de l'utilisateur
+     * @param motDePasse: le mot de passe de l'utilisateur
+     * @return une entité de réponse avec un message de succès , un status 200 OK et le token de l'utilisateur
+     * si les informations sont correctes sinon un status 401 UNAUTHORIZED et un message d'erreur
+     */
+    @GetMapping("/connexion")
+    public ResponseEntity<Map<String, String>> connexionUtilisateur(@RequestParam String mail, @RequestParam String motDePasse) {
+        Utilisateur utilisateur = interractionBdUtilisateur.findByMail(mail);
+        System.out.println("coucou");
+        if ( utilisateur == null || !utilisateur.getMotDePasse().equals(motDePasse)) {
+            throw new ErreurAuthentification(ERREUR_CONNEXION);
+        }
+        // else
+        Map <String, String> reponse = new HashMap<>();
+        reponse.put("message", SUCCES_CONNEXION);
+        reponse.put("token", utilisateur.getToken());
+        return new ResponseEntity<>(reponse , HttpStatus.OK);
     }
 
     /**
@@ -72,6 +95,12 @@ public class ControleurUtilisateur {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ErreurAuthentification.class)
+    public ResponseEntity<String> gestionErreurAuthentification(ErreurAuthentification ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 
     /**
