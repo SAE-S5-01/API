@@ -1,52 +1,37 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+
+@Setter
+@Getter
 @Entity
 @Table(name = "utilisateur")
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "nom" , length = 50)
     private String nom;
+
+    @Column(name = "prenom" , length = 50)
     private String prenom;
+
+    @Column(name = "mail" , length = 50)
     private String mail;
+
+    @Column(name = "token" , length = 50)
     private String token;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "motDePasse" , length = 20)
+    private String motDePasse;
 
-    public String getNom() {
-        return nom;
-    }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
+    @Column (name = "adresse" , length = 100)
+    private String adresse;
 
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

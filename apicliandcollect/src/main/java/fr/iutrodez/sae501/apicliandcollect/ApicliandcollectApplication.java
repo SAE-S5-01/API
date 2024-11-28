@@ -8,7 +8,5 @@ public class ApicliandcollectApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ApicliandcollectApplication.class, args);
-        System.out.println("Hello World");
     }
-
 }
