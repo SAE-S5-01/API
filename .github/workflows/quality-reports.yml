@@ -35,7 +35,7 @@ jobs:
 
       # Étape 4 : Construction du projet sans exécuter les tests
       - name: Construction du projet
-        run: mvn clean install -DskipTests
+        run: mvn -f apicliandcollect/pom.xml clean install -DskipTests
 
     outputs:
       maven-cache-key: ${{ steps.cache.outputs.cache-hit }}
@@ -68,15 +68,15 @@ jobs:
 
       # Étape 4 : Exécuter les tests avec génération du rapport de couverture
       - name: Exécution des tests avec couverture
-        run: mvn test jacoco:report
+        run: mvn -f apicliandcollect/pom.xml test jacoco:report
 
       # Étape 5 : Analyse statique avec SpotBugs
       - name: Analyse avec SpotBugs
-        run: mvn spotbugs:spotbugs
+        run: mvn -f apicliandcollect/pom.xml spotbugs:spotbugs
 
       # Étape 6 : Publication des résultats de SpotBugs
       - name: Publication du rapport SpotBugs
         uses: actions/upload-artifact@v3
         with:
           name: spotbugs-report
-          path: target/spotbugs.xml
+          path: apicliandcollect/target/spotbugs.xml
