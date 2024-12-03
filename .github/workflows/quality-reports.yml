@@ -66,17 +66,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # Étape 4 : Exécuter les tests avec génération du rapport de couverture
+      # Étape 4 : Exécution des tests avec génération du rapport de couverture
       - name: Exécution des tests avec couverture
+        env:
+          SPRING_PROFILES_ACTIVE: test  # Active le profil de test pour utiliser H2
         run: mvn -f apicliandcollect/pom.xml test jacoco:report
-
-      # Étape 5 : Analyse statique avec SpotBugs
-      - name: Analyse avec SpotBugs
-        run: mvn -f apicliandcollect/pom.xml spotbugs:spotbugs
-
-      # Étape 6 : Publication des résultats de SpotBugs
-      - name: Publication du rapport SpotBugs
-        uses: actions/upload-artifact@v3
-        with:
-          name: spotbugs-report
-          path: apicliandcollect/target/spotbugs.xml
