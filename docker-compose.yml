@@ -1,0 +1,56 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cliandcollect-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - cliandcollect-network
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+
+  mongodb:
+    image: mongo:6.0
+    container_name: cliandcollect-mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_API_USER: ${MONGO_API_USER}
+      MONGO_API_PASSWORD: ${MONGO_API_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker-config/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    networks:
+      - cliandcollect-network
+
+  # api:
+  #   image: cliandcollect/cliandcollect-api:latest
+  #   container_name: cliandcollect-api
+  #   depends_on:
+  #     - mysql
+  #     - mongodb
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+  #     SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+  #     SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+  #     SPRING_MONGODB_URI: ${SPRING_MONGODB_URI}
+  #   networks:
+  #     - cliandcollect-network
+
+volumes:
+  mysql_data:
+  mongodb_data:
+
+networks:
+  cliandcollect-network:
