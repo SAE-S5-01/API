@@ -69,7 +69,7 @@ public class ControleurUtilisateur {
         utilisateur = serviceAuthentification.authenticate(mail, motDePasse);
         String token = serviceJwt.generateToken(utilisateur);
         reponse.put("token", token);
-        return new ResponseEntity<>(reponse, HttpStatus.OK);
+        return new ResponseEntity<>(reponse, HttpStatus.CREATED);
     }
 
     /**

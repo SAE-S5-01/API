@@ -22,19 +22,22 @@ import java.lang.annotation.Target;
 public class UtilisateurDTO {
     // Getters and Setters
     @NotBlank(message = "Votre nom est obligatoire")
-    @Size(max = 50, message = "Votre nom doit contenir moins de 50 caractères")
+    @Size(max = 50, message = "Votre nom ne peut pas contenir plus de 50 caractères")
     private String nom;
 
     @NotBlank(message = "Votre prénom est obligatoire")
-    @Size(max = 50, message = "Votre prénom doit contenir moins de 50 caractères")
+    @Size(max = 50, message = "Votre prénom ne peut pas contenir plus de 50 caractères")
     private String prenom;
 
     @NotBlank(message = "Votre email est obligatoire")
-    @Email(message = "Adresse email non valide : ex. Johndoe@gmail.com")
-    @Size(max = 50, message = "Votre email doit contenir moins de 50 caractères")
+    @Email(message = "Adresse email non valide : ex. johndoe@gmail.com")
+    // TODO revoir nombre max de caractères
+    @Size(max = 50, message = "Votre email ne peut pas contenir plus de 50 caractères")
     @UniqueEmail
     private String mail;
 
+    // TODO Réunion sur les caractères spéciaux à autoriser
+    // TODO Retoucher message d'erreur  en fonction des caractères spéciaux autorisés
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$",
             message = "Le mot de passe doit contenir entre 8 et 20 caractères, avec au moins une lettre majuscule, " +
                     "une lettre minuscule, un chiffre et un caractère spécial"
