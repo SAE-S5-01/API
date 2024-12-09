@@ -22,7 +22,7 @@ import java.util.Map;
  * @Author SAE501
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/utilisateur")
 public class ControleurUtilisateur {
 
     @Autowired
@@ -72,8 +72,8 @@ public class ControleurUtilisateur {
     @GetMapping("/connexion")
     public ResponseEntity<Map<String, String>> connexionUtilisateur(@RequestParam String mail, @RequestParam String motDePasse) {
         Utilisateur utilisateur = interractionBdUtilisateur.findByMail(mail);
-        System.out.println("coucou");
         if ( utilisateur == null || !utilisateur.getMotDePasse().equals(motDePasse)) {
+            System.out.println("Erreur connexion");
             throw new ErreurControleurUtilisateur(ERREUR_CONNEXION);
         }
         // else
@@ -85,7 +85,6 @@ public class ControleurUtilisateur {
 
     @PutMapping("/suppresionCompte")
     public ResponseEntity<String> supprimerCompte(@RequestParam String token) {
-        System.out.println(token);
         Utilisateur utilisateur = interractionBdUtilisateur.findByToken(token);
         if (utilisateur == null) {
             throw new ErreurControleurUtilisateur(ERREUR_SUPPRESSION);
@@ -103,12 +102,17 @@ public class ControleurUtilisateur {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> gestionValidationRequete(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> gestionValidationRequete(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("erreur", errors);
+        response.put("saisie", ex.getBindingResult().getTarget());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)

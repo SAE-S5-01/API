@@ -1,8 +1,12 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
+import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Setter
@@ -34,4 +38,16 @@ public class Utilisateur {
     @Column (name = "adresse" , length = 100)
     private String adresse;
 
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contact> clients = new ArrayList<>();
+
+    public void ajouterClient(Contact contact) {
+        clients.add(contact);
+        contact.setUtilisateur(this);
+    }
+
+    public void supprimerClient(Contact contact) {
+        clients.remove(contact);
+        contact.setUtilisateur(null);
+    }
 }
