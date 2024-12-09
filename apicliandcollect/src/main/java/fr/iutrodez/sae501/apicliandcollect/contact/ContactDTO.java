@@ -29,8 +29,9 @@ import java.lang.annotation.Target;
     @Size(max = 50, message = "Le prénom de votre contact peut contenir au maximum de 50 caractères")
     private String prenom;
 
+    @NotBlank(message = "Le numero de telephone du contact ne peut pas etre vide")
+    @Pattern(regexp = "^(?:\\+33|0)?([1-9]\\d{8})$",
 
-    @Pattern(regexp = "^(?:\\+33|0)?(:[1-9]\\d{8})$\n",
             message = "Le numéro de téléphone du client doit etre au format francais. Exemple : +33 6 12 34 56 78"
     )
     private String telephone;
@@ -43,5 +44,7 @@ import java.lang.annotation.Target;
     @Size(max = 500, message = "La description du contact peut contenir au maximum de 500 caractères")
     private String description;
 
+    
     // TODO coordonnées de l'utilisateur
+    
 }

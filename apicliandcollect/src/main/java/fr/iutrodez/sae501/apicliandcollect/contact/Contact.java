@@ -17,7 +17,7 @@ public class Contact {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "utilisateur_token") // Colonne FK dans la table
+    @JoinColumn(name = "utilisateur") // Colonne FK dans la table Utilisateur
     private Utilisateur utilisateur;
 
     @Column(name = "nom" , length = 50)
@@ -32,6 +32,6 @@ public class Contact {
     @Column(name = "description" , length = 500)
     private String description;
 
-    @Column(name = "telephone" , length = 10)
+    @Column(name = "telephone" , length = 12)
     private String telephone;
 }

@@ -95,25 +95,4 @@ public class ControleurUtilisateur {
         interractionBdUtilisateur.delete(utilisateur);
         return new ResponseEntity<>(SUCCES_SUPPRESSION ,HttpStatus.OK);
     }
-
-    /**
-     * Gère les exceptions de validation.
-     * Est appelé automatiquement par le @Valid dans la méthode inscrireUtilisateur.
-     * @param ex l'exception MethodArgumentNotValidException
-     * @return une entité de réponse avec les messages d'erreur de validation et un status 400 BAD REQUEST
-     */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> gestionValidationRequete(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("erreur", errors);
-        response.put("saisie", ex.getBindingResult().getTarget());
-
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
 }
