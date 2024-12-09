@@ -1,4 +1,4 @@
-package fr.iutrodez.sae501.apicliandcollect.utilisateur;
+package fr.iutrodez.sae501.apicliandcollect.exceptions;
 
 /**
  * Exception levée lorsqu'une erreur d'authentification survient

@@ -1,17 +1,19 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
+import fr.iutrodez.sae501.apicliandcollect.exceptions.ErreurControleurUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.securite.ServiceAuthentification;
+import fr.iutrodez.sae501.apicliandcollect.securite.ServiceJwt;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,10 +30,17 @@ public class ControleurUtilisateur {
     @Autowired
     private InterractionBdUtilisateur interractionBdUtilisateur;
 
-    private static final String MESSAGE_ERREUR = "Erreur interne au serveur";
+    @Autowired
+    private ServiceAuthentification serviceAuthentification;
+
+    @Autowired
+    private ServiceJwt serviceJwt;
+
+    @Autowired
+    private PasswordEncoder encoderMotPasse;
+
     private static final String SUCCES_INSCRIPTION = "Utilisateur inscrit avec succès";
     private static final String SUCCES_CONNEXION = "Utilisateur connecté avec succès";
-    private static final String ERREUR_CONNEXION = "Mail ou mot de passe incorrect";
     private static final String SUCCES_SUPPRESSION = "Compte supprimé avec succès";
     private static final String ERREUR_SUPPRESSION = "Suppression du compte impossible";
     
@@ -44,20 +53,21 @@ public class ControleurUtilisateur {
      * sera géré par gestionException
      */
     @PostMapping("/inscription")
-    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @RequestBody UtilisateurDTO utilisateurDTO) throws NoSuchAlgorithmException {
+    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @RequestBody UtilisateurDTO utilisateurDTO) {
         String nom = utilisateurDTO.getNom();
         String motDePasse = utilisateurDTO.getMotDePasse();
-        String token = generationToken(nom, motDePasse);
+        String mail = utilisateurDTO.getMail();
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setNom(nom);
         utilisateur.setPrenom(utilisateurDTO.getPrenom());
-        utilisateur.setMail(utilisateurDTO.getMail());
-        utilisateur.setMotDePasse(motDePasse);
+        utilisateur.setMail(mail);
+        utilisateur.setMotDePasse(encoderMotPasse.encode(motDePasse));
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
-        utilisateur.setToken(token);
         interractionBdUtilisateur.save(utilisateur);
         Map <String, String> reponse = new HashMap<>();
         reponse.put("message", SUCCES_INSCRIPTION);
+        utilisateur = serviceAuthentification.authenticate(mail, motDePasse);
+        String token = serviceJwt.generateToken(utilisateur);
         reponse.put("token", token);
         return new ResponseEntity<>(reponse, HttpStatus.OK);
     }
@@ -71,25 +81,17 @@ public class ControleurUtilisateur {
      */
     @GetMapping("/connexion")
     public ResponseEntity<Map<String, String>> connexionUtilisateur(@RequestParam String mail, @RequestParam String motDePasse) {
-        Utilisateur utilisateur = interractionBdUtilisateur.findByMail(mail);
-        if ( utilisateur == null || !utilisateur.getMotDePasse().equals(motDePasse)) {
-            System.out.println("Erreur connexion");
-            throw new ErreurControleurUtilisateur(ERREUR_CONNEXION);
-        }
-        // else
+        Utilisateur utilisateurAauthentifier =  serviceAuthentification.authenticate(mail, motDePasse);
+        String token = serviceJwt.generateToken(utilisateurAauthentifier);
         Map <String, String> reponse = new HashMap<>();
         reponse.put("message", SUCCES_CONNEXION);
-        reponse.put("token", utilisateur.getToken());
-        return new ResponseEntity<>(reponse , HttpStatus.OK);
+        reponse.put("token", token);
+        return ResponseEntity.ok(reponse);
     }
 
     @PutMapping("/suppresionCompte")
-    public ResponseEntity<String> supprimerCompte(@RequestParam String token) {
-        Utilisateur utilisateur = interractionBdUtilisateur.findByToken(token);
-        if (utilisateur == null) {
-            throw new ErreurControleurUtilisateur(ERREUR_SUPPRESSION);
-        }
-        // else 
+    public ResponseEntity<String> supprimerCompte(Authentication authentication) {
+        Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
         interractionBdUtilisateur.delete(utilisateur);
         return new ResponseEntity<>(SUCCES_SUPPRESSION ,HttpStatus.OK);
     }
@@ -113,36 +115,5 @@ public class ControleurUtilisateur {
         response.put("saisie", ex.getBindingResult().getTarget());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(ErreurControleurUtilisateur.class)
-    public ResponseEntity<String> gestionErreurAuthentification(ErreurControleurUtilisateur ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-    }
-
-    /**
-     * Capture toutes les exceptions non gérées.
-     *
-     * @return une entité de réponse avec un message d'erreur générique et un status 500 INTERNAL SERVER ERROR
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> gestionException() {
-        return ResponseEntity.internalServerError().body(MESSAGE_ERREUR);
-    }
-
-    /**
-     * Méthode de génération de token.
-     *
-     * @param nom : nom de l'utilisateur
-     * @param motDePasse : mot de passe de l'utilisateur
-     * @return un token généré sous la forme nom + motDePasse + timestamp , le tout hashé en base 64
-     * @throws NoSuchAlgorithmException : exception levée si l'algorithme de hashage n'est pas trouvé
-     */
-    private static String generationToken(String nom , String motDePasse) throws NoSuchAlgorithmException {
-        String token = nom + motDePasse + System.currentTimeMillis();
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(hash);
     }
 }

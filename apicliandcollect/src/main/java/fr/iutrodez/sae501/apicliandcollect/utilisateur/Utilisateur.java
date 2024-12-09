@@ -4,8 +4,11 @@ import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -13,7 +16,7 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "utilisateur")
-public class Utilisateur {
+public class Utilisateur implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,10 +31,7 @@ public class Utilisateur {
     @Column(name = "mail" , length = 50)
     private String mail;
 
-    @Column(name = "token" , length = 50)
-    private String token;
-
-    @Column(name = "motDePasse" , length = 20)
+    @Column(name = "motDePasse")
     private String motDePasse;
 
 
@@ -49,5 +49,20 @@ public class Utilisateur {
     public void supprimerClient(Contact contact) {
         clients.remove(contact);
         contact.setUtilisateur(null);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return motDePasse;
+    }
+
+    @Override
+    public String getUsername() {
+        return mail;
     }
 }
