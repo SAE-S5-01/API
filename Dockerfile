@@ -6,8 +6,6 @@ WORKDIR /app
 
 COPY apicliandcollect/ .
 
-COPY docker-config/application.properties apicliandcollect/src/main/resources/application.properties
-
 # Construire l'application avec Maven pour générer le fichier JAR
 RUN mvn clean package -DskipTests
 
@@ -17,6 +15,11 @@ FROM openjdk:21-jdk-slim
 # Copier le JAR généré depuis l'étape précédente
 COPY --from=build /app/target/apicliandcollect-0.0.1-SNAPSHOT.jar /cliandcollect-api.jar
 
+# Copier le script wait-for-it.sh dans l'image
+COPY ./docker-config/wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/cliandcollect-api.jar"]
+# Utiliser wait-for-it.sh pour attendre que MySQL soit prêt avant de démarrer l'application
+ENTRYPOINT ["/wait-for-it.sh", "cliandcollect-mysql:3306", "--", "java", "-jar", "/cliandcollect-api.jar"]
