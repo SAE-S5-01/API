@@ -60,10 +60,10 @@ public class ConfigurationSecurite {
         return http.csrf(AbstractHttpConfigurer::disable) // Désactivation de la protection CSRF.
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                // Permet un accès sans authentification aux endpoints spécifiés.
-                                .requestMatchers("/api/utilisateur/connexion", "/api/utilisateur/inscription").permitAll()
-                                // Toutes les autres requêtes nécessitent une authentification.
-                                .anyRequest().authenticated()
+                            // Permet un accès sans authentification aux endpoints spécifiés.
+                            .requestMatchers("/api/utilisateur/connexion", "/api/utilisateur/inscription", "/api/apijoignable").permitAll()
+                            // Toutes les autres requêtes nécessitent une authentification.
+                            .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         // Utilisation de sessions sans état (stateless) pour une API REST sécurisée.

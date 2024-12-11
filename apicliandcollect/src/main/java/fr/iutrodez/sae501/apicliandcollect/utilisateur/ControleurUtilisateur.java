@@ -28,6 +28,9 @@ import java.util.Map;
 public class ControleurUtilisateur {
 
     @Autowired
+    private UtilisateurService service;
+
+    @Autowired
     private InterractionBdUtilisateur interractionBdUtilisateur;
 
     @Autowired
@@ -47,29 +50,19 @@ public class ControleurUtilisateur {
     /**
      * Inscrit un nouvel utilisateur.
      *
-     * @param utilisateurDTO l'objet de transfert de données de l'utilisateur contenant les détails de l'utilisateur
-     * @return une entité de réponse avec un message de succès
-     * @throws NoSuchAlgorithmException : si une exception survient lors de la génération du hash , elle est propagé et
-     * sera géré par gestionException
+     * @param utilisateurInscrit l'objet de transfert de données de l'utilisateur contenant les détails de l'utilisateur
+     * @return une entité de réponse avec un message de création
      */
     @PostMapping("/inscription")
-    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @RequestBody UtilisateurDTO utilisateurDTO) {
-        String nom = utilisateurDTO.getNom();
-        String motDePasse = utilisateurDTO.getMotDePasse();
-        String mail = utilisateurDTO.getMail();
-        Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setNom(nom);
-        utilisateur.setPrenom(utilisateurDTO.getPrenom());
-        utilisateur.setMail(mail);
-        utilisateur.setMotDePasse(encoderMotPasse.encode(motDePasse));
-        utilisateur.setAdresse(utilisateurDTO.getAdresse());
-        interractionBdUtilisateur.save(utilisateur);
+    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @RequestBody UtilisateurDTO utilisateurInscrit) {
+        UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
         Map <String, String> reponse = new HashMap<>();
-        reponse.put("message", SUCCES_INSCRIPTION);
-        utilisateur = serviceAuthentification.authenticate(mail, motDePasse);
+        reponse.put("mail", utilisateurDTO.getMail());
+        reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
+        Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
         String token = serviceJwt.generateToken(utilisateur);
         reponse.put("token", token);
-        return new ResponseEntity<>(reponse, HttpStatus.OK);
+        return new ResponseEntity<>(reponse, HttpStatus.CREATED);
     }
 
     /**
@@ -89,10 +82,15 @@ public class ControleurUtilisateur {
         return ResponseEntity.ok(reponse);
     }
 
+    /**
+     * Supprime un utilisateur
+     * @param authentication : les informations d'authentification de l'utilisateur
+     * @return un message de succès et un code de statut 200 (OK)
+     */
     @PutMapping("/suppresionCompte")
     public ResponseEntity<String> supprimerCompte(Authentication authentication) {
         Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
-        interractionBdUtilisateur.delete(utilisateur);
+        service.supprimerUtilisateur(utilisateur);
         return new ResponseEntity<>(SUCCES_SUPPRESSION ,HttpStatus.OK);
     }
 }
