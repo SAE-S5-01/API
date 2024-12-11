@@ -4,6 +4,11 @@ on:
     branches:
       - 'production'
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branche à utiliser pour le workflow"
+        default: "production"
+        required: true
 
 jobs:
   build-docker:
