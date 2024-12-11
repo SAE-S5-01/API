@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,6 +15,8 @@ import static org.mockito.Mockito.*;
 /**
  * Classe de test d'UtilisateurService.java
  */
+
+@ActiveProfiles("test")
 class UtilisateurServiceTest {
 
     @Mock
