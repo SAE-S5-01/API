@@ -59,11 +59,14 @@ jobs:
           key: ${{ needs.build.outputs.maven-cache-key }}
           restore-keys: |
             ${{ runner.os }}-maven-
+            
+      - name: Ajouter les configurations privées dans application-test.properties
+        run: |
+          echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
+          echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
 
-      #- name: Exécution des tests avec couverture
-      #  env:
-      #    SPRING_PROFILES_ACTIVE: test  # Active le profil de test pour utiliser H2
-      #  run: mvn -f apicliandcollect/pom.xml test jacoco:report
+      - name: Exécution des tests avec couverture
+        run: mvn -f apicliandcollect/pom.xml test jacoco:report
 
       - name: Mise en cache des packages SonarQube
         uses: actions/cache@v4
