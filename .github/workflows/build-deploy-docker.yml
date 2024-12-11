@@ -1,0 +1,26 @@
+name: "Construction de l'image et Déploiement Docker"
+on:
+  push:
+    branches:
+      - 'production'
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Construction et publication de l'image Docker
+  build-docker:
+    name: Construction et publication image Docker
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Récupération du code source
+      - name: Récupération du code
+        uses: actions/checkout@v3
+
+      # 2. Connexion à Docker Hub
+      - name: Connexion à Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      # 3. Build et push de l'image Docker
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest
