@@ -2,11 +2,10 @@ name: "Construction de l'image et Déploiement Docker"
 on:
   push:
     branches:
-      #- 'production'
+      - 'production'
   workflow_dispatch:
 
 jobs:
-  # Job 1: Construction et publication de l'image Docker
   build-docker:
     name: Construction et publication image Docker
     runs-on: ubuntu-latest
@@ -24,3 +23,27 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest
+
+  generate-env:
+    name: "Crée le fichier d'environnement"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Création du fichier .env
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+          echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
+          echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
+          echo "SPRING_APPLICATION_NAME=${{ secrets.SPRING_APPLICATION_NAME }}" >> .env
+          echo "SPRING_MONGODB_URI=${{ secrets.SPRING_MONGODB_URI }}" >> .env
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}" >> .env
+          echo "SECURITY_JWT_SECRET_KEY=${{ secrets.SECURITY_JWT_SECRET_KEY }}" >> .env
+          echo "SECURITY_JWT_EXPIRATION_TIME=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> .env
