@@ -22,6 +22,7 @@ import java.util.Map;
 public class GestionExceptionGlobale {
 
     private static final String ERREUR_CONNEXION = "Mail ou mot de passe incorrect";
+    private static final String ERREUR_INCONNUE = "Erreur interne au serveur. Veuillez réessayer plus tard.";
 
     /**
      * Gère les exceptions de validation.
@@ -84,7 +85,7 @@ public class GestionExceptionGlobale {
 
         if (errorDetail == null) {
             errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
-            errorDetail.setProperty("description", "Unknown internal server error.");
+            errorDetail.setProperty("description", ERREUR_INCONNUE);
         }
 
         return errorDetail;

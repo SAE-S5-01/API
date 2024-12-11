@@ -44,7 +44,10 @@ import java.lang.annotation.Target;
     @Size(max = 500, message = "La description du contact peut contenir au maximum de 500 caractères")
     private String description;
 
-    
     // TODO coordonnées de l'utilisateur
+    // peut etre pas necessaire si c'est le back de l'app mobile qui s'assure de ca ?
+    private double longitude;
+    private double latitude;
+
     
 }
