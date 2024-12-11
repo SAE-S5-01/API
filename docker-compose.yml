@@ -33,7 +33,7 @@ services:
       - cliandcollect-network
 
   api:
-    image: cliandcollect-api:latest
+    image: loicfaugieres/cliandcollect-api
     container_name: cliandcollect-api
     depends_on:
       - mysql
