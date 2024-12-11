@@ -2,7 +2,7 @@ name: "Construction de l'image et Déploiement Docker"
 on:
   push:
     branches:
-      - 'production'
+      #- 'production'
   workflow_dispatch:
 
 jobs:
