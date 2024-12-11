@@ -1,4 +1,5 @@
 spring.application.name=
+spring.data.mongodb.uri=
 spring.datasource.url=
 spring.datasource.username=
 spring.datasource.password=
