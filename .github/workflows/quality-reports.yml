@@ -76,13 +76,14 @@ jobs:
       - name: Exécution des tests et génération du rapport JaCoCo
         run: mvn -B test jacoco:report -f apicliandcollect/pom.xml
 
-      - name: "Vérification de l'arborescence"
-        run: ls -R ./  
+      - name: Vérification de la génération du rapport JaCoCo
+        run: |
+          ls -R apicliandcollect/target/
 
       - name: jacoco-reporter
         uses: PavanMudigonda/jacoco-reporter@v5.0
         with:
-          coverage_results_path: target/apicliandcollect/jacoco/jacoco.xml
+          coverage_results_path: apicliandcollect/target/site/jacoco/jacoco.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
        
       - name: Ajouter un résumé du job de couverture
