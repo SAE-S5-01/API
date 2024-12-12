@@ -68,6 +68,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Ajouter les configurations privées dans application-test.properties
+        run: |
+          echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
+          echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
+
       - name: Exécution des tests avec couverture
         run: mvn -f apicliandcollect/pom.xml test jacoco:report
      
