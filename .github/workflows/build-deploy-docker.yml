@@ -44,31 +44,26 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
+      - name: Créer le fichier .env localement
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+          echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
+          echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
+
       - name: Copier les fichiers nécessaires vers le serveur
         run: |
           scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
             docker-config/init-mongo.js \
             docker-config/wait-for-it.sh \
-            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect/
-
-      - name: Générer et transférer le fichier .env sur le serveur
-        run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << 'EOF'
-            set -e
-            sudo -s <<'END'
-              cd /var/www/cliandcollect/
-              echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
-              echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
-              echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-              echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-              echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
-              echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
-              echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
-              echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
-              echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
-            END
-          EOF
+            .env \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
