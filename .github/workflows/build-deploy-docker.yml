@@ -63,7 +63,7 @@ jobs:
             docker-config/init-mongo.js \
             docker-config/wait-for-it.sh \
             .env \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect/
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
