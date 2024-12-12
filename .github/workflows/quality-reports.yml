@@ -79,7 +79,7 @@ jobs:
       - name: jacoco-reporter
         uses: PavanMudigonda/jacoco-reporter@v5.0
         with:
-          coverage_results_path: apicliandcollect/target/jacoco/jacoco.xml
+          coverage_results_path: target/site/jacoco/jacoco.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
        
       - name: Ajouter un résumé du job de couverture
