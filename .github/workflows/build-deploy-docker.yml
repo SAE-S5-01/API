@@ -50,11 +50,11 @@ jobs:
             docker-compose.yml \
             docker-config/init-mongo.js \
             docker-config/wait-for-it.sh \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
+            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect/
 
       - name: Générer et transférer le fichier .env sur le serveur
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << 'EOF'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << 'EOF'
             set -e
             sudo -s <<'END'
               cd /var/www/cliandcollect/
@@ -72,7 +72,7 @@ jobs:
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << EOF
             set -e
             sudo -s <<END
               cd /var/www/cliandcollect/
