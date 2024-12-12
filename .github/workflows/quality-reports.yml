@@ -77,10 +77,6 @@ jobs:
         run: ls -R /home/runner/work/API/API/
         continue-on-error: true
 
-      - name: "Vérification de l'arborescence2"
-        run: ls -R /home/runner/work/API/API/apicliandcollect
-        continue-on-error: true
-
       - name: Construction avec Maven
         run: mvn -B package -f apicliandcollect/pom.xml
 
@@ -90,7 +86,7 @@ jobs:
       - name: jacoco-reporter
         uses: PavanMudigonda/jacoco-reporter@v5.0
         with:
-          coverage_results_path: apicliandcollect/target/site/jacoco/jacoco.xml
+          coverage_results_path: target/jacoco/jacoco.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
        
       - name: Ajouter un résumé du job de couverture
