@@ -67,9 +67,9 @@ jobs:
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << EOF
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << 'EOF'
             set -e
-            sudo -s <<END
+            sudo -s <<'END'
               cd /var/www/cliandcollect/
               
               # Arrêter les conteneurs en cours
