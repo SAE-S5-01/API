@@ -77,7 +77,7 @@ jobs:
         run: mvn -B package -f apicliandcollect/pom.xml
 
       - name: Génération du rapport de couverture JaCoCo
-        run: mvn jacoco:report
+        run: mvn jacoco:report -f apicliandcollect/pom.xml
 
       - name: "Vérification de l'arborescence"
         run: ls -R ./
