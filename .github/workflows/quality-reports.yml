@@ -76,19 +76,6 @@ jobs:
       - name: Exécution des tests et génération du rapport JaCoCo
         run: mvn -B test jacoco:report -f apicliandcollect/pom.xml
 
-      - name: Vérification de la génération du rapport JaCoCo
-        run: |
-          ls -R apicliandcollect/target/
-
-      - name: jacoco-reporter
-        uses: PavanMudigonda/jacoco-reporter@v5.0
-        with:
-          coverage_results_path: apicliandcollect/target/site/jacoco/jacoco.xml
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-       
-      - name: Ajouter un résumé du job de couverture
-        run: echo "${{ steps.jacoco-reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
-
       - name: Mise en cache des packages SonarQube
         uses: actions/cache@v4
         with:
