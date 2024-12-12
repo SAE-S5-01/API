@@ -42,6 +42,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
 
+    services:
+      mongodb:
+        image: mongo:6.0
+        env:
+          MONGO_INITDB_DATABASE: cliandcollect-tests
+        ports:
+          - 27017:27017
+
     steps:
       - name: Récupération du code
         uses: actions/checkout@v3
@@ -59,14 +67,18 @@ jobs:
           key: ${{ needs.build.outputs.maven-cache-key }}
           restore-keys: |
             ${{ runner.os }}-maven-
-            
-      - name: Ajouter les configurations privées dans application-test.properties
-        run: |
-          echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
-          echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
 
       - name: Exécution des tests avec couverture
         run: mvn -f apicliandcollect/pom.xml test jacoco:report
+     
+      - name: jacoco-reporter
+        uses: PavanMudigonda/jacoco-reporter@v5.0
+        with:
+          coverage_results_path: apicliandcollect/target/jacoco/jacoco.xml
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+       
+      - name: Ajouter un résumé du job de couverture
+        run: echo "${{ steps.jacoco-reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Mise en cache des packages SonarQube
         uses: actions/cache@v4
