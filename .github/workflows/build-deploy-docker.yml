@@ -44,11 +44,12 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
-      - name: Copier les fichiers nécessaires directement vers /var/www/cliandcollect
+      - name: Copier les fichiers nécessaires vers le serveur
         run: |
-          rsync -avz -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" \
+          scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
-            docker-config/ \
+            docker-config/init-mongo.js \
+            docker-config/wait-for-it.sh \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
 
       - name: Générer et transférer le fichier .env sur le serveur
