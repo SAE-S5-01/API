@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -13,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Classe de test d'UtilisateurService.java
+ * Classe de test de  {@link fr.iutrodez.sae501.apicliandcollect.utilisateur.UtilisateurService}
  */
-
 @ActiveProfiles("test")
+@SpringBootTest
 class UtilisateurServiceTest {
 
     @Mock

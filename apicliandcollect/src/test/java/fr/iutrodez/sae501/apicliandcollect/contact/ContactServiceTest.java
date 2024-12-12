@@ -1,19 +1,17 @@
-package fr.iutrodez.sae501.apicliandcollect;
+package fr.iutrodez.sae501.apicliandcollect.contact;
 
-import fr.iutrodez.sae501.apicliandcollect.contact.ContactMongo;
-import fr.iutrodez.sae501.apicliandcollect.contact.ContactService;
-import fr.iutrodez.sae501.apicliandcollect.contact.InterractionMongoContact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+/**
+ * Classe de test de  {@link fr.iutrodez.sae501.apicliandcollect.contact.ContactService}
+ */
 @ActiveProfiles("test")
 @SpringBootTest
 class ContactServiceTest {

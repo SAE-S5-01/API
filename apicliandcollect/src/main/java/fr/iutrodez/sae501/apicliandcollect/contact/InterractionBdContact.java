@@ -6,6 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface InterractionBdContact extends JpaRepository<Contact, Long> {
-
-    List<Contact> findByUtilisateur(Utilisateur u)  ;
+    List<Contact> findByUtilisateur(Utilisateur u);
 }
