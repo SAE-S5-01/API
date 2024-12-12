@@ -31,8 +31,12 @@ jobs:
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest
 
   deploy:
-    name: Déploie Docker sur le serveur
+    name: Déploiement Docker sur le serveur
     runs-on: ubuntu-latest
+    needs: build-docker   # Le job de déploiement se fait après le job de build
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}  # Définir la variable d'environnement SSH_USER
+      SSH_SERVER: ${{ secrets.SSH_SERVER }}  # Définir la variable d'environnement SSH_SERVER
 
     steps:
       - name: Récupérer le code source
@@ -43,16 +47,21 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
+      - name: Vérification de l'adresse du serveur
+        run: |
+          echo "Test de la connexion SSH vers le serveur ${SSH_USER}@${SSH_SERVER}"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_SERVER }} "hostname"
+
       - name: Copier les fichiers nécessaires sur le serveur
         run: |
           scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
             -r docker-config \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
+            ${{ env.SSH_USER }}@${{ env.SSH_SERVER }}:/var/www/cliandcollect/
 
       - name: Générer et transférer le fichier .env sur le serveur
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_SERVER }} << EOF
             set -e
             sudo -s <<END
               cd /var/www/cliandcollect/
@@ -70,7 +79,7 @@ jobs:
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@${{ env.SSH_SERVER }} << EOF
             set -e
             sudo -s <<END
               cd /var/www/cliandcollect/
