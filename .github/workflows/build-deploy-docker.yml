@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'production'
+      - 'recette'
   workflow_dispatch:
     inputs:
       branch:
@@ -29,26 +30,63 @@ jobs:
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest
 
-  generate-env:
-    name: "Crée le fichier d'environnement"
+  deploy:
+    name: Déploie Docker sur le serveur
     runs-on: ubuntu-latest
+
     steps:
-      - name: Création du fichier .env
+      - name: Récupérer le code source
+        uses: actions/checkout@v3
+
+      - name: Configurer la clé SSH
         run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
-          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
-          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
-          echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
-          echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
-          echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
-          echo "SPRING_APPLICATION_NAME=${{ secrets.SPRING_APPLICATION_NAME }}" >> .env
-          echo "SPRING_DATA_MONGODB_URI=${{ secrets.SPRING_DATA_MONGODB_URI }}" >> .env
-          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> .env
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
-          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}" >> .env
-          echo "SECURITY_JWT_SECRET_KEY=${{ secrets.SECURITY_JWT_SECRET_KEY }}" >> .env
-          echo "SECURITY_JWT_EXPIRATION_TIME=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> .env
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 400 private_key.pem
+
+      - name: Copier les fichiers nécessaires sur le serveur
+        run: |
+          scp -i private_key.pem -o StrictHostKeyChecking=no \
+            docker-compose.yml \
+            -r docker-config \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }}:/var/www/cliandcollect/
+
+      - name: Générer et transférer le fichier .env sur le serveur
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+            set -e
+            sudo -s <<END
+              cd /var/www/cliandcollect/
+              echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+              echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+              echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+              echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+              echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+              echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+              echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
+              echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
+              echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
+            END
+          EOF
+
+      - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+            set -e
+            sudo -s <<END
+              cd /var/www/cliandcollect/
+              
+              # Arrêter les conteneurs en cours
+              docker compose down || true
+              
+              # Nettoyer les conteneurs et images inutilisés, sans affecter les volumes
+              docker container prune --force
+              docker image prune --all --force
+              
+              # Redémarrer les conteneurs
+              docker compose up -d --build
+            END
+          EOF
+
+      - name: Nettoyer les fichiers temporaires
+        if: always()
+        run: rm -f private_key.pem
