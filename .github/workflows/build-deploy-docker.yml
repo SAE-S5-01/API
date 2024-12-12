@@ -34,9 +34,9 @@ jobs:
     name: Déploiement Docker sur le serveur
     runs-on: ubuntu-latest
     needs: build-docker
-    vars:
-      SSH_USER: ${{ vars.SSH_USER }}  # Définir la variable GitHub Action SSH_USER ici
-      SSH_SERVER: ${{ vars.SSH_SERVER }}  # Définir la variable GitHub Action SSH_SERVER ici
+    env:
+      SSH_USER: ${{ vars.SSH_USER }}
+      SSH_SERVER: ${{ vars.SSH_SERVER }}
 
     steps:
       - name: Récupérer le code source
