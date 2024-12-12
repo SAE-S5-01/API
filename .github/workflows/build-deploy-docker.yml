@@ -54,9 +54,9 @@ jobs:
 
       - name: Générer et transférer le fichier .env sur le serveur
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << EOF
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_SERVER }} << 'EOF'
             set -e
-            sudo -s <<END
+            sudo -s <<'END'
               cd /var/www/cliandcollect/
               echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
               echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
