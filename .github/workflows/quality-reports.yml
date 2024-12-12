@@ -73,20 +73,19 @@ jobs:
           echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
           echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
 
-      - name: "Vérification de l'arborescence"
-        run: ls -R /home/runner/work/API/API/
-        continue-on-error: true
-
       - name: Construction avec Maven
         run: mvn -B package -f apicliandcollect/pom.xml
 
       - name: Génération du rapport de couverture JaCoCo
         run: mvn jacoco:report
+
+      - name: "Vérification de l'arborescence"
+        run: ls -R ./
      
       - name: jacoco-reporter
         uses: PavanMudigonda/jacoco-reporter@v5.0
         with:
-          coverage_results_path: target/jacoco/jacoco.xml
+          coverage_results_path: target/apicliandcollect/jacoco/jacoco.xml
           github_token: ${{ secrets.GITHUB_TOKEN }}
        
       - name: Ajouter un résumé du job de couverture
