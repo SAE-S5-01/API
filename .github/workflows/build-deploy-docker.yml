@@ -67,21 +67,22 @@ jobs:
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << 'EOF'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << EOF
             set -e
-            sudo -s <<'END'
-              cd /var/www/cliandcollect/
+            # Passage en root et exécution des commandes
+            sudo bash -c "
+              cd /var/www/cliandcollect/ &&
               
               # Arrêter les conteneurs en cours
-              docker compose down || true
+              docker compose down || true &&
               
               # Nettoyer les conteneurs et images inutilisés, sans affecter les volumes
-              docker container prune --force
-              docker image prune --all --force
+              docker container prune --force &&
+              docker image prune --all --force &&
               
               # Redémarrer les conteneurs
               docker compose up -d --build
-            END
+            "
           EOF
 
       - name: Nettoyer les fichiers temporaires
