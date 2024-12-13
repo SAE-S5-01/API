@@ -30,12 +30,13 @@ public class ContactService {
     public ContactDTO creerContact(ContactDTO contactAajoute, Utilisateur u) {
         Contact contact = new Contact();
         ContactMongo contactMongo = new ContactMongo();
-        contact.setEntreprise(contactAajoute.getEntreprise());
-        contact.setNom(contactAajoute.getNom());
-        contact.setPrenom(contactAajoute.getPrenom());
+        contact.setEntreprise(contactAajoute.getNomEntreprise());
+        contact.setNom(contactAajoute.getNomContact());
+        contact.setPrenom(contactAajoute.getPrenomContact());
         contact.setAdresse(contactAajoute.getAdresse());
         contact.setDescription(contactAajoute.getDescription());
         contact.setTelephone(contactAajoute.getTelephone());
+        contact.setProspect(contactAajoute.isProspect());
         contact.setUtilisateur(u);
         Contact resultat = interractionBdContact.save(contact);
         contactMongo.set_id(resultat.getId());
@@ -69,11 +70,12 @@ public class ContactService {
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
-        contactDTO.setNom(contact.getNom());
-        contactDTO.setPrenom(contact.getPrenom());
+        contactDTO.setNomContact(contact.getNom());
+        contactDTO.setPrenomContact(contact.getPrenom());
         contactDTO.setAdresse(contact.getAdresse());
         contactDTO.setDescription(contact.getDescription());
         contactDTO.setTelephone(contact.getTelephone());
+        contactDTO.setProspect(contact.isProspect());
         contactDTO.setLatitude(localisation.getLocation().getY());
         contactDTO.setLongitude(localisation.getLocation().getX());
         return contactDTO;

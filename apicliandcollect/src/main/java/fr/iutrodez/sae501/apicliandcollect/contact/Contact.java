@@ -29,7 +29,7 @@ public class Contact {
     @Column(name = "prenom" , length = 50)
     private String prenom;
 
-    @Column(name = "adresse" , length = 100)
+    @Column(name = "adresse" , length = 300)
     private String adresse;
 
     @Column(name = "description" , length = 500)
@@ -37,4 +37,7 @@ public class Contact {
 
     @Column(name = "telephone" , length = 12)
     private String telephone;
+
+    @Column(name = "prospect")
+    private boolean prospect;
 }
