@@ -30,6 +30,7 @@ public class ContactService {
     public ContactDTO creerContact(ContactDTO contactAajoute, Utilisateur u) {
         Contact contact = new Contact();
         ContactMongo contactMongo = new ContactMongo();
+        contact.setEntreprise(contactAajoute.getEntreprise());
         contact.setNom(contactAajoute.getNom());
         contact.setPrenom(contactAajoute.getPrenom());
         contact.setAdresse(contactAajoute.getAdresse());

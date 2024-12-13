@@ -20,6 +20,9 @@ public class Contact {
     @JoinColumn(name = "utilisateur") // Colonne FK dans la table Utilisateur
     private Utilisateur utilisateur;
 
+    @Column(name = "entreprise", length = 50)
+    private String entreprise;
+
     @Column(name = "nom" , length = 50)
     private String nom;
 
