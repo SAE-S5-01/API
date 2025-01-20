@@ -1,54 +1,54 @@
 name: Construction et Rapports de Qualité pour API Spring Boot
 
 on:
-  push:
-  workflow_dispatch:
+  push: # Le workflow se déclenche à chaque "push" (envoi de modifications sur le dépôt)
+  workflow_dispatch: # Il peut également être déclenché manuellement via l'interface GitHub
 
 jobs:
-  build:
+  build: # Le job "build" est responsable de la construction du projet (vérification qu'il n'y ait pas d'erreur de compilation)
     name: Construction du projet
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Le job s'exécute sur une machine virtuelle Ubuntu.
 
     steps:
       # Étape 1 : Récupérer le code source depuis le dépôt
       - name: Récupération du code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # Utilise l'action officielle GitHub pour récupérer le code dans l'environnement
 
       # Étape 2 : Configurer le JDK 21 pour la construction du projet
       - name: Configuration de JDK 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: 'temurin' # Utilise la distribution Temurin de Java (OpenJDK)
+          java-version: '21' # Version de Java à utiliser pour le build
 
       # Étape 3 : Mise en cache des dépendances Maven pour accélérer les builds
       - name: Mise en cache des dépendances Maven
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository # Le répertoire où les dépendances Maven sont stockées
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }} # Clé de cache basée sur le contenu du fichier pom.xml
           restore-keys: |
             ${{ runner.os }}-maven-
 
       # Étape 4 : Construction du projet sans exécuter les tests
       - name: Construction du projet
-        run: mvn -f apicliandcollect/pom.xml clean install -DskipTests
+        run: mvn -f apicliandcollect/pom.xml clean install -DskipTests # Utilise Maven pour construire le projet sa,s lancer les tests (prochain job)
 
     outputs:
-      maven-cache-key: ${{ steps.cache.outputs.cache-hit }}
+      maven-cache-key: ${{ steps.cache.outputs.cache-hit }} # Sauvegarde la clé du cache Maven pour l'utiliser dans les jobs suivants
 
-  analyze:
+  analyze: # Le job "analyze" est responsable de l'analyse de la qualité du code et des tests
     name: Analyse du code et rapports de qualité
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Ce job dépend du job "build", donc il s'exécutera seulement après que la construction du projet soit terminée
 
-    services:
+    services: # Un service MongoDB est démarré dans un conteneur Docker pour les tests
       mongodb:
         image: mongo:6.0
         env:
           MONGO_INITDB_DATABASE: cliandcollect-tests
         ports:
-          - 27017:27017
+          - 27017:27017 # Expose le port 27017 (port par défaut de MongoDB) pour que le projet puisse y accéder pendant les tests
 
     steps:
       - name: Récupération du code
@@ -64,27 +64,29 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ needs.build.outputs.maven-cache-key }}
+          key: ${{ needs.build.outputs.maven-cache-key }} # Utilise la clé de cache provenant du job "build" pour garantir que le cache est cohérent
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Ajouter les configurations privées dans application-test.properties
+      - name: Ajouter les configurations privées dans application-test.properties #  Cette étape crée un fichier de propriétés pour les tests, en ajoutant des configurations sensibles comme des clés secrètes pour les jetons jwt
         run: |
           echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
           echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
-
+      # Utilise les secrets stockés dans GitHub (par exemple, `SECURITY_JWT_SECRET_KEY`) pour remplir les informations de configuration sensibles nécessaires pour les tests
+      
       - name: Exécution des tests et génération du rapport JaCoCo
-        run: mvn -B test jacoco:report -f apicliandcollect/pom.xml
+        run: mvn -B test jacoco:report -f apicliandcollect/pom.xml # Utilise Maven pour exécuter les tests (option `-B` pour "batch" et exécuter sans interaction utilisateur) et génère un rapport JaCoCo pour mesurer la couverture de code
 
       - name: Mise en cache des packages SonarQube
         uses: actions/cache@v4
         with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
+          path: ~/.sonar/cache # Spécifie le répertoire de cache SonarQube
+          key: ${{ runner.os }}-sonar # La clé pour le cache, qui dépend du système d'exploitation utilisé
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Analyse du code avec SonarCloud
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Utilise le token GitHub pour s'authentifier auprès de SonarCloud
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Utilise un token secret pour SonarCloud, stocké dans GitHub Secrets
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -f apicliandcollect/pom.xml -Dsonar.projectKey=SAE-S5-01_API
+        # Lance l'analyse SonarCloud du code source, avec un identifiant de projet spécifique (`sonar.projectKey`)
