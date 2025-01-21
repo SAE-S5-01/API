@@ -1,0 +1,8 @@
+spring.application.name=
+spring.data.mongodb.uri=
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+security.jwt.secret-key=
+security.jwt.expiration-time=
