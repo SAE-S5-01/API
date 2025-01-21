@@ -2,9 +2,9 @@ name: "Construction de l'image et Déploiement Docker"
 on:
   push:
     branches:
-      - 'production'
-      - 'recette'
+      - 'production' # Le workflow se déclenche pour lesp push sur la branche "production"
   workflow_dispatch:
+    # Permet de lancer manuellement le workflow avec une branche spécifique
     inputs:
       branch:
         description: "Branche à utiliser pour le workflow"
@@ -18,14 +18,17 @@ jobs:
     steps:
       # 1. Récupération du code source
       - name: Récupération du code
+        # Clone le dépôt GitHub dans la VM
         uses: actions/checkout@v3
 
       # 2. Connexion à Docker Hub
       - name: Connexion à Docker Hub
+        # Connexion au registre Docker Hub en utilisant les secrets configurés
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       # 3. Build et push de l'image Docker
       - name: Build and Push Docker Image
+        # Construit l'image Docker avec la dernière version du code et la pousse sur Docker Hub
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest .
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cliandcollect-api:latest
@@ -33,6 +36,7 @@ jobs:
   deploy:
     name: Déploiement Docker sur le serveur
     runs-on: ubuntu-latest
+    # Ce job dépend de la complétion du job "build-docker"
     needs: build-docker
 
     steps:
@@ -40,11 +44,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configurer la clé SSH
+        # Crée un fichier contenant la clé privée pour accéder au serveur distant
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
       - name: Créer le fichier .env localement
+        # Génère un fichier .env contenant toutes les variables d'environnement requises pour l'application
         run: |
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
@@ -65,6 +71,8 @@ jobs:
           echo "SECURITY_JWT_EXPIRATION_TIME=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> .env
 
       - name: Copier les fichiers nécessaires vers le serveur
+        # Transfère les fichiers requis pour le déploiement vers le serveur distant
+        # et utilise la clé privée ssh pour se connecter
         run: |
           scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
@@ -74,6 +82,7 @@ jobs:
             ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
+        # Arrête les conteneurs existants, nettoie les ressources inutilisées et redémarre les conteneurs à partir du docker-compose.yml.
         run: |
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }} << EOF
             set -e
@@ -94,5 +103,6 @@ jobs:
           EOF
 
       - name: Nettoyer les fichiers temporaires
+        # Supprime la clé privée temporaire locale pour des raisons de sécurité
         if: always()
         run: rm -f private_key.pem
