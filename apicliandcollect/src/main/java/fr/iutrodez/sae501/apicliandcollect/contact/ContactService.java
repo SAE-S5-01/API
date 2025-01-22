@@ -70,6 +70,7 @@ public class ContactService {
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
+        contactDTO.setNomEntreprise(contact.getEntreprise());
         contactDTO.setNomContact(contact.getNom());
         contactDTO.setPrenomContact(contact.getPrenom());
         contactDTO.setAdresse(contact.getAdresse());
