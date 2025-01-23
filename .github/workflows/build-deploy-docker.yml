@@ -2,14 +2,9 @@ name: "Construction de l'image et Déploiement Docker"
 on:
   push:
     branches:
-      - 'production' # Le workflow se déclenche pour lesp push sur la branche "production"
+      - 'production' # Le workflow se déclenche pour les push sur la branche "production"
   workflow_dispatch:
     # Permet de lancer manuellement le workflow avec une branche spécifique
-    inputs:
-      branch:
-        description: "Branche à utiliser pour le workflow"
-        default: "production"
-        required: true
 
 jobs:
   build-docker:
@@ -79,7 +74,7 @@ jobs:
             docker-config/init-mongo.js \
             docker-config/wait-for-it.sh \
             .env \
-            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect
+            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/api-cliandcollect
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         # Arrête les conteneurs existants, nettoie les ressources inutilisées et redémarre les conteneurs à partir du docker-compose.yml.
@@ -88,7 +83,7 @@ jobs:
             set -e
             # Passage en root et exécution des commandes
             sudo bash -c "
-              cd /var/www/cliandcollect/ &&
+              cd /var/www/api-cliandcollect/ &&
               
               # Arrêter les conteneurs en cours
               docker compose down || true &&
