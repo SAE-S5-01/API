@@ -1,33 +1,25 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
-import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.mapping.Document;
+import java.util.LinkedHashMap;
 
 
 @Setter
 @Getter
-@Entity
-@Table(name = "itineraire")
+@Document(collection = "itineraire")
+@TypeAlias("ItineraireMongo")
 public class Itineraire {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    private long _id;
 
-    @ManyToOne
-    @JoinColumn(name = "utilisateur") // Colonne FK dans la table Utilisateur
-    private Utilisateur utilisateur;
+    private String nomItineraire;
 
-    @Column(name = "nom" , length = 50)
-    private String nom;
+    private LinkedHashMap<Long , GeoJsonPoint> listeClients;
 
+    private long idCreateur;
 }
+
