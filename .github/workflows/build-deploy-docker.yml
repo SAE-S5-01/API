@@ -47,12 +47,9 @@ jobs:
       - name: Créer le fichier .env localement
         # Génère un fichier .env contenant toutes les variables d'environnement requises pour l'application
         run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
-          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
           echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
           echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
           echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
@@ -71,8 +68,6 @@ jobs:
         run: |
           scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
-            docker-config/init-mongo.js \
-            docker-config/wait-for-it.sh \
             .env \
             ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/api-cliandcollect
 
