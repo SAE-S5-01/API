@@ -5,6 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface InterractionMongoContact extends MongoRepository<ContactMongo, String> {
+public interface InterractionMongoContact extends MongoRepository<ContactMongo, Long> {
     
 }
