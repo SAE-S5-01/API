@@ -4,10 +4,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,14 @@ public class UtilisateurDTO {
     // TODO verifier existence de l'adresse
     @NotBlank(message = "Votre adresse est obligatoire")
     private String adresse;
+
+    @Max(message = "La longitude ne peut pas dépasser 180°", value = 180)
+    @Min(message = "La longitude ne peut pas être en dessous de -180°", value = -180)
+    private double longitude;
+
+    @Max(message = "La latitude ne peut pas dépasser 90°", value = 90)
+    @Min(message = "La latitude ne peut pas être en dessous de -90°", value = -90)
+    private double latitude;
 
     @Constraint(validatedBy = EmailUniqueValidator.class)
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
