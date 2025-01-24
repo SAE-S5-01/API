@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -25,6 +26,9 @@ class UtilisateurServiceTest {
     private InterractionBdUtilisateur interractionBdUtilisateur;
 
     @Mock
+    private InterractionMongoUtilisateur interractionMongoUtilisateur;
+
+    @Mock
     private PasswordEncoder encoderMotPasse;
 
     @InjectMocks
@@ -33,6 +37,10 @@ class UtilisateurServiceTest {
     private UtilisateurDTO utilisateurDTO;
 
     long id = 1L;
+
+    double longitude = 54.123;
+
+    double latitude = 76.1245;
 
     @BeforeEach
     public void setUp() {
@@ -57,15 +65,20 @@ class UtilisateurServiceTest {
         when(encoderMotPasse.encode(utilisateurDTO.getMotDePasse())).thenReturn(motDePasseEncode);
 
         Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setId(id);
         utilisateur.setNom(utilisateurDTO.getNom());
         utilisateur.setPrenom(utilisateurDTO.getPrenom());
         utilisateur.setMail(utilisateurDTO.getMail());
         utilisateur.setMotDePasse(motDePasseEncode);
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
 
+        UtilisateurMongo utilisateurMongo = new UtilisateurMongo();
+        utilisateurMongo.set_id(utilisateur.getId());
+        utilisateurMongo.setLocation(new GeoJsonPoint(longitude, latitude));
+
         // Simulation sauvegarde dans la base de données
         when(interractionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
-        when(utilisateur.getId()).thenReturn(id);
+        when(interractionMongoUtilisateur.save(Mockito.any(UtilisateurMongo.class))).thenReturn(utilisateurMongo);
 
         UtilisateurDTO result = utilisateurService.creerUtilisateur(utilisateurDTO);
         assertNotNull(result);

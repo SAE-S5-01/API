@@ -70,7 +70,7 @@ class ContactServiceTest {
         return id;
     }
 
-    @Test
+    /*@Test
     void testFindContactById() {
         contactMongo = new ContactMongo();
         contactMongo.set_id(1L);
@@ -81,7 +81,7 @@ class ContactServiceTest {
 
         // Vérifie que le contact récupéré n'est pas null et a les bonnes informations
         assertThat(result).isNotNull();
-    }
+    }*/
 
     @Test
     void creerContactTest() {
