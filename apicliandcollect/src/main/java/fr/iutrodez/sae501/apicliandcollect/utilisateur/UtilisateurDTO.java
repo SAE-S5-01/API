@@ -43,6 +43,7 @@ public class UtilisateurDTO {
 
     // TODO verifier existence de l'adresse
     @NotBlank(message = "Votre adresse est obligatoire")
+    @Size(max = 300, message = "L'adresse postale du contact peut  contenir un maximum de 300 caractères")
     private String adresse;
 
     @Max(message = "La longitude ne peut pas dépasser 180°", value = 180)
