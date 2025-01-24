@@ -36,11 +36,7 @@ class UtilisateurServiceTest {
 
     private UtilisateurDTO utilisateurDTO;
 
-    long id = 1L;
-
-    double longitude = 54.123;
-
-    double latitude = 76.1245;
+    Long id = 1L;
 
     @BeforeEach
     public void setUp() {
@@ -51,6 +47,8 @@ class UtilisateurServiceTest {
         utilisateurDTO.setMail("test.ju@test.com");
         utilisateurDTO.setMotDePasse("mdpTest1!");
         utilisateurDTO.setAdresse("AdresseTest");
+        utilisateurDTO.setLongitude(54.123);
+        utilisateurDTO.setLatitude(76.1245);
 
         utilisateurService = new UtilisateurService();
 
@@ -74,9 +72,9 @@ class UtilisateurServiceTest {
 
         UtilisateurMongo utilisateurMongo = new UtilisateurMongo();
         utilisateurMongo.set_id(utilisateur.getId());
-        utilisateurMongo.setLocation(new GeoJsonPoint(longitude, latitude));
+        utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurDTO.getLongitude(), utilisateurDTO.getLatitude()));
 
-        // Simulation sauvegarde dans la base de données
+        // Simulation sauvegarde dans les bases de données
         when(interractionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
         when(interractionMongoUtilisateur.save(Mockito.any(UtilisateurMongo.class))).thenReturn(utilisateurMongo);
 
@@ -86,10 +84,14 @@ class UtilisateurServiceTest {
         assertEquals("PrenomTest", result.getPrenom());
         assertEquals("test.ju@test.com", result.getMail());
         assertEquals(motDePasseEncode, result.getMotDePasse());
+        assertNotEquals("mdpTest1!", result.getMotDePasse());
         assertEquals("AdresseTest", result.getAdresse());
+        assertEquals(54.123, result.getLongitude());
+        assertEquals(76.1245, result.getLatitude());
 
         verify(encoderMotPasse, times(1)).encode(utilisateurDTO.getMotDePasse());
         verify(interractionBdUtilisateur, times(1)).save(Mockito.any(Utilisateur.class));
+        verify(interractionMongoUtilisateur, times(1)).save(Mockito.any(UtilisateurMongo.class));
     }
 
     @Test

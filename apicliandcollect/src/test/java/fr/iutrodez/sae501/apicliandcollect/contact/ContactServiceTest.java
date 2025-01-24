@@ -40,7 +40,7 @@ class ContactServiceTest {
 
     private Utilisateur utilisateur;
 
-    private long id;
+    private Long id = 1L;
 
 
     @BeforeEach
@@ -70,23 +70,24 @@ class ContactServiceTest {
         return id;
     }
 
-    /*@Test
+    @Test
     void testFindContactById() {
         contactMongo = new ContactMongo();
-        contactMongo.set_id(1L);
+        contactMongo.set_id(id);
         // Simule la récupération d'un contact par son id
-        when(interractionMongoContact.findById(1L)).thenReturn(java.util.Optional.of(contactMongo));
+        when(interractionMongoContact.findById(id.toString())).thenReturn(java.util.Optional.of(contactMongo));
 
-        ContactMongo result = interractionMongoContact.findById(1L).orElse(null);
+        ContactMongo result = interractionMongoContact.findById(id.toString()).orElse(null);
 
         // Vérifie que le contact récupéré n'est pas null et a les bonnes informations
         assertThat(result).isNotNull();
-    }*/
+    }
 
     @Test
     void creerContactTest() {
 
         Contact contactSQL = new Contact();
+        contactSQL.setId(id);
         contactSQL.setEntreprise(contactDTO.getNomEntreprise());
         contactSQL.setNom(contactDTO.getNomContact());
         contactSQL.setPrenom(contactDTO.getPrenomContact());
@@ -96,11 +97,10 @@ class ContactServiceTest {
         contactSQL.setUtilisateur(utilisateur);
 
         contactMongo = new ContactMongo();
-        contactMongo.set_id(1L);
+        contactMongo.set_id(id);
         contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
 
-        // Simulation sauvegarde dans la base de données
-        when(contact.getId()).thenReturn(simulationSauvegarde());
+        // Simulation sauvegarde dans les bases de données
         when(interractionBdContact.save(Mockito.any(Contact.class))).thenReturn(contactSQL);
         when(interractionMongoContact.save(Mockito.any(ContactMongo.class))).thenReturn(contactMongo);
 
