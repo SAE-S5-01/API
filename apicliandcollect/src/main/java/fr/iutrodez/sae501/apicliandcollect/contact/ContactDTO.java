@@ -44,5 +44,7 @@ import lombok.Setter;
     private double latitude;
 
     private boolean prospect;
+
+    private long id;
     
 }
