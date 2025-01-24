@@ -1,5 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
+import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,6 +32,8 @@ class UtilisateurServiceTest {
 
     private UtilisateurDTO utilisateurDTO;
 
+    long id = 1L;
+
     @BeforeEach
     public void setUp() {
         // Initialisation des données pour les tests
@@ -41,7 +44,8 @@ class UtilisateurServiceTest {
         utilisateurDTO.setMotDePasse("mdpTest1!");
         utilisateurDTO.setAdresse("AdresseTest");
 
-        //encoderMotPasse = Mockito.mock(PasswordEncoder.class);
+        utilisateurService = new UtilisateurService();
+
         MockitoAnnotations.initMocks(this);
     }
 
@@ -61,6 +65,7 @@ class UtilisateurServiceTest {
 
         // Simulation sauvegarde dans la base de données
         when(interractionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
+        when(utilisateur.getId()).thenReturn(id);
 
         UtilisateurDTO result = utilisateurService.creerUtilisateur(utilisateurDTO);
         assertNotNull(result);
@@ -83,6 +88,8 @@ class UtilisateurServiceTest {
         utilisateur.setMail(utilisateurDTO.getMail());
         utilisateur.setMotDePasse(utilisateurDTO.getMotDePasse());
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
+
+        doNothing().when(interractionBdUtilisateur).delete(Mockito.any(Utilisateur.class));
 
         utilisateurService.supprimerUtilisateur(utilisateur);
 
