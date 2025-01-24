@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 
 /**
- * Méthode de validation pour l'annotion MapKeyValidator
+ * Méthode de validation pour l'annotation MapKeyValidator
  * @author Descriaud Lucas
  */
 public class MapKeyValidator implements ConstraintValidator<ValidateMapKeysExistInTable, Map<Long, ?>> {

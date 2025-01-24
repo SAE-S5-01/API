@@ -13,7 +13,7 @@ public class ItineraireService {
     @Autowired
     private InterractionMongoItineraire interractionMongoItineraire;
 
-    // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
+    // TODO appel de la classe utilitaire où seront stockes les methodes de calcul d'itinéraire
     public  LinkedHashMap<Long , GeoJsonPoint> creerItineraire(
             LinkedHashMap<Long , GeoJsonPoint> listeClients) {
         return listeClients; // STUB
