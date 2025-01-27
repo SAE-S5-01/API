@@ -28,14 +28,13 @@ public class Utilisateur implements UserDetails {
     @Column(name = "prenom" , length = 50)
     private String prenom;
 
-    @Column(name = "mail" , length = 50)
+    @Column(name = "mail" , length = 200)
     private String mail;
 
-    @Column(name = "motDePasse")
+    @Column(name = "motDePasse", length = 60)
     private String motDePasse;
 
-
-    @Column (name = "adresse" , length = 100)
+    @Column (name = "adresse" , length = 300)
     private String adresse;
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
