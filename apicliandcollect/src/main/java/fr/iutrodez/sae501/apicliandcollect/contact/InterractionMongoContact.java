@@ -6,5 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface InterractionMongoContact extends MongoRepository<ContactMongo, String> {
-    
+    ContactMongo findBy_id(Long id);
 }

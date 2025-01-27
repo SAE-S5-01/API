@@ -20,6 +20,8 @@ public class ControleurContact {
     @Autowired
     ContactService service;
 
+    private static final String SUCCES_MODIFICATION = "Client modifié avec succès";
+
     /**
      * Récupère la liste des contacts de l'utilisateur connecté.
      *
@@ -46,5 +48,13 @@ public class ControleurContact {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         ContactDTO contact  = service.creerContact(contactAajoute, u);
         return new ResponseEntity<>(contact, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/modifier")
+    public ResponseEntity<String> modifierClient(@Valid @RequestBody ContactDTO contactModifier,@RequestParam String id,Authentication utilisateur){
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        Long ID = Long.parseLong(id);
+        service.modifierContact(contactModifier,u, ID);
+        return new ResponseEntity<>(SUCCES_MODIFICATION,HttpStatus.OK);
     }
 }
