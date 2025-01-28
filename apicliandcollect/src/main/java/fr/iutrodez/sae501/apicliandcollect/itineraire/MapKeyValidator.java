@@ -4,6 +4,7 @@ import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Point;
 
 import java.util.Map;
 
@@ -11,24 +12,48 @@ import java.util.Map;
  * Méthode de validation pour l'annotion MapKeyValidator
  * @author Descriaud Lucas
  */
-public class MapKeyValidator implements ConstraintValidator<ValidateMapKeysExistInTable, Map<Long, ?>> {
+public class MapKeyValidator implements ConstraintValidator<ValidateMap, Map<Long, Point>> {
 
     @Autowired
     private InterractionBdContact client;
 
+    private static final int MAX_X = 180;
+    private static final int MIN_X = -180;
+    private static final int MAX_Y = 90;
+    private static final int MIN_Y = -90;
+
     @Override
-    public boolean isValid(Map<Long, ?> value, ConstraintValidatorContext context) {
+    public boolean isValid(Map<Long, Point> value, ConstraintValidatorContext context) {
 
-        for (Long key : value.keySet()) {
+        context.disableDefaultConstraintViolation(); // Désactiver les violations par défaut
+        StringBuilder listeErreurs = new StringBuilder(); // Accumulateur pour les messages d'erreur
+        boolean erreur = false;
+
+        for (Map.Entry<Long, Point> entry : value.entrySet()) {
+            Long key = entry.getKey();
+            Point point = entry.getValue();
+
+            // Vérification si le client existe
             if (!client.existsById(key)) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(
-                                "Le client : " + key + " n\'existe pas dans la base de données")
-                        .addConstraintViolation();
-                return false;
+                listeErreurs.append("Le client : ").append(key).append(" n'existe pas dans la base de données. ");
+                erreur = true;
+            }
 
+            // Vérification des coordonnées
+            if (point.getX() < MIN_X || point.getX() > MAX_X || point.getY() < MIN_Y || point.getY() > MAX_Y) {
+                listeErreurs.append("Les coordonnées du client : ").append(key)
+                        .append(" sont incorrectes (x: ").append(point.getX())
+                        .append(", y: ").append(point.getY()).append("). ");
+                erreur = true;
             }
         }
-        return true ;
+
+        // Ajout du message d'erreur global si des erreurs sont détectées
+        if (erreur) {
+            context.buildConstraintViolationWithTemplate(listeErreurs.toString().trim())
+                    .addConstraintViolation();
+        }
+
+        return !erreur; // Retourne false si une erreur est détectée
     }
 }
