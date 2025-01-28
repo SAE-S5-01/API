@@ -1,24 +1,26 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 @RestController
-@RequestMapping("api/itineraire")
+@RequestMapping("/api")
 public class    ControleurItineraire {
 
     @Autowired
     private ItineraireService itineraireService;
 
-    @PostMapping("/calculer")
+    @PostMapping("/itineraire/calculer")
     public ResponseEntity<LinkedHashMap<Long, Point>> verifierListe(@Valid @RequestBody ListeClientDTO utilisateurInscrit) {
 
         LinkedHashMap<Long, Point> itineraireCalcule = itineraireService.calculerItineraire(utilisateurInscrit.getListePoint());
@@ -26,9 +28,17 @@ public class    ControleurItineraire {
 
     }
 
-    @PostMapping("/creer")
+    @PostMapping("/itineraire")
     public ResponseEntity<ItineraireToApp> creerItineraire(@Valid @RequestBody ItineraireDTO itineraire) {
         ItineraireToApp itineraireCree = itineraireService.creerItineraire(itineraire);
         return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
+    }
+
+    @GetMapping("/itineraire")
+    public ResponseEntity<ArrayList<ItineraireToApp>> getItineraire(Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        Long idCreateur = u.getId();
+        ArrayList<ItineraireToApp> listeItineraire = itineraireService.listeItineraire(idCreateur);
+        return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
     }
 }

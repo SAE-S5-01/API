@@ -2,6 +2,7 @@ package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
@@ -54,11 +55,20 @@ public class ItineraireService {
         insertion.setLineStringCoordonnees(geoJsonLineString);
 
         interractionMongoItineraire.save(insertion);
-        return retourApi(insertion); // STUB
+        return formattageItineraire(insertion); // STUB
     }
 
+    public ArrayList<ItineraireToApp> listeItineraire(Long idCreateur) {
+        ArrayList<Itineraire> listeItineraire = interractionMongoItineraire.findByIdCreateur(idCreateur);
+        ArrayList<ItineraireToApp> listeItineraireFormatte = new ArrayList<>();
+        for(Itineraire i : listeItineraire) {
+            listeItineraireFormatte.add(formattageItineraire(i));
+        }
+        return listeItineraireFormatte;
 
-    private ItineraireToApp retourApi (Itineraire i) {
+    }
+
+    private ItineraireToApp formattageItineraire(Itineraire i) {
         ItineraireToApp itineraire = new ItineraireToApp();
         itineraire.setNomItineraire(i.getNomItineraire());
         itineraire.setIdItineraire(i.get_id());
