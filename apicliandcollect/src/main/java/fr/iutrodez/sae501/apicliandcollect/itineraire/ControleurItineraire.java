@@ -25,4 +25,10 @@ public class    ControleurItineraire {
         return new ResponseEntity<>(itineraireCalcule, HttpStatus.OK);
 
     }
+
+    @PostMapping("/creer")
+    public ResponseEntity<ItineraireToApp> creerItineraire(@Valid @RequestBody ItineraireDTO itineraire) {
+        ItineraireToApp itineraireCree = itineraireService.creerItineraire(itineraire);
+        return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
+    }
 }
