@@ -9,7 +9,7 @@ import org.springframework.data.geo.Point;
 import java.util.Map;
 
 /**
- * Méthode de validation pour l'annotion MapKeyValidator
+ * Méthode de validation pour l'annotation MapKeyValidator
  * @author Descriaud Lucas
  */
 public class MapKeyValidator implements ConstraintValidator<ValidateMap, Map<Long, Point>> {
