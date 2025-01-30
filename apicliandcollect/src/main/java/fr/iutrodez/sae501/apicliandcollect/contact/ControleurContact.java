@@ -50,7 +50,7 @@ public class ControleurContact {
         return new ResponseEntity<>(contact, HttpStatus.CREATED);
     }
 
-    @PutMapping("/modifier")
+    @PutMapping("/contact")
     public ResponseEntity<String> modifierClient(@Valid @RequestBody ContactDTO contactModifier,@RequestParam String id,Authentication utilisateur){
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long ID = Long.parseLong(id);
