@@ -2,14 +2,9 @@ name: "Construction de l'image et Déploiement Docker"
 on:
   push:
     branches:
-      - 'production' # Le workflow se déclenche pour lesp push sur la branche "production"
+      - 'production' # Le workflow se déclenche pour les push sur la branche "production"
   workflow_dispatch:
     # Permet de lancer manuellement le workflow avec une branche spécifique
-    inputs:
-      branch:
-        description: "Branche à utiliser pour le workflow"
-        default: "production"
-        required: true
 
 jobs:
   build-docker:
@@ -52,12 +47,9 @@ jobs:
       - name: Créer le fichier .env localement
         # Génère un fichier .env contenant toutes les variables d'environnement requises pour l'application
         run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
-          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
           echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" >> .env
           echo "MONGO_API_USER=${{ secrets.MONGO_API_USER }}" >> .env
           echo "MONGO_API_PASSWORD=${{ secrets.MONGO_API_PASSWORD }}" >> .env
@@ -76,10 +68,8 @@ jobs:
         run: |
           scp -i private_key.pem -o StrictHostKeyChecking=no \
             docker-compose.yml \
-            docker-config/init-mongo.js \
-            docker-config/wait-for-it.sh \
             .env \
-            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/cliandcollect
+            ${{ vars.SSH_USER }}@${{ vars.SSH_SERVER }}:/var/www/api-cliandcollect
 
       - name: Nettoyer, arrêter et redémarrer les conteneurs sur le serveur distant
         # Arrête les conteneurs existants, nettoie les ressources inutilisées et redémarre les conteneurs à partir du docker-compose.yml.
@@ -88,7 +78,7 @@ jobs:
             set -e
             # Passage en root et exécution des commandes
             sudo bash -c "
-              cd /var/www/cliandcollect/ &&
+              cd /var/www/api-cliandcollect/ &&
               
               # Arrêter les conteneurs en cours
               docker compose down || true &&

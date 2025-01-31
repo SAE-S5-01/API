@@ -28,21 +28,19 @@ public class UtilisateurDTO {
 
     @NotBlank(message = "Votre email est obligatoire")
     @Email(message = "Adresse email non valide : ex. johndoe@gmail.com")
-    // TODO revoir nombre max de caractères
-    @Size(max = 50, message = "Votre email ne peut pas contenir plus de 50 caractères")
+    @Size(max = 20, message = "Votre email ne peut pas contenir plus de 200 caractères")
     @UniqueEmail
     private String mail;
 
-    // TODO Réunion sur les caractères spéciaux à autoriser
-    // TODO Retoucher message d'erreur  en fonction des caractères spéciaux autorisés
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$",
-            message = "Le mot de passe doit contenir entre 8 et 20 caractères, avec au moins une lettre majuscule, " +
-                    "une lettre minuscule, un chiffre et un caractère spécial"
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W.-])[A-Za-z\\d\\W.-]{8,50}$",
+            message = "Le mot de passe doit contenir entre 8 et 50 caractères, avec au moins une lettre majuscule, " +
+                      "une lettre minuscule, un chiffre et un caractère spécial UTF-8"
     )
     private String motDePasse;
 
     // TODO verifier existence de l'adresse
     @NotBlank(message = "Votre adresse est obligatoire")
+    @Size(max = 300, message = "L'adresse postale du contact peut contenir au maximum 300 caractères")
     private String adresse;
 
     @Max(message = "La longitude ne peut pas dépasser 180°", value = 180)

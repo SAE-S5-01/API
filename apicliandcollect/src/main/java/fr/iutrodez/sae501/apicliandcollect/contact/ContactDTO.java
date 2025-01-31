@@ -27,9 +27,11 @@ import lombok.Setter;
     )
     private String telephone;
 
+    private Long ID;
+
     // TODO verifier existence de l'adresse
     @NotBlank(message = "L'adresse postale du contact ne peut pas être vide")
-    @Size(max = 300, message = "L'adresse postale du contact peut  contenir au maximum de 100 caractères")
+    @Size(max = 300, message = "L'adresse postale du contact peut  contenir un maximum de 300 caractères")
     private String adresse;
 
     @Size(max = 500, message = "La description du contact peut contenir au maximum de 500 caractères")

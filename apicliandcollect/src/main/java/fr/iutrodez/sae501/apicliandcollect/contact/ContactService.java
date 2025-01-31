@@ -45,6 +45,21 @@ public class ContactService {
         return contactEnJson(resultat , localisation);
     }
 
+    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id){
+        Contact contacAmodifier =interractionBdContact.findByUtilisateurAndId(u,id).getFirst();
+        contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
+        contacAmodifier.setDescription(contactModifier.getDescription());
+        contacAmodifier.setAdresse(contactModifier.getAdresse());
+        contacAmodifier.setTelephone(contactModifier.getTelephone());
+        contacAmodifier.setNom(contactModifier.getNomContact());
+        contacAmodifier.setPrenom(contactModifier.getPrenomContact());
+        contacAmodifier.setProspect(contactModifier.isProspect());
+        ContactMongo contactMongoAmodifier = interractionMongoContact.findBy_id(id);
+        contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
+        interractionMongoContact.save(contactMongoAmodifier);
+        interractionBdContact.save(contacAmodifier);
+    }
+
     /**
      * Récupère la liste des contacts de l'utilisateur u
      *
@@ -70,7 +85,7 @@ public class ContactService {
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
-        contactDTO.setId(contact.getId());
+        contactDTO.setID(contact.getId());
         contactDTO.setNomEntreprise(contact.getEntreprise());
         contactDTO.setNomContact(contact.getNom());
         contactDTO.setPrenomContact(contact.getPrenom());
