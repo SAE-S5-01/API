@@ -7,9 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +47,8 @@ class ContactServiceTest {
 
     private Long id = 1L;
 
+    private Contact contactSQL;
+
 
     @BeforeEach
     public void setUp() {
@@ -59,6 +66,16 @@ class ContactServiceTest {
         contactService = new ContactService();
 
         utilisateur = new Utilisateur();
+
+        contactSQL = new Contact();
+        contactSQL.setId(id);
+        contactSQL.setEntreprise(contactDTO.getNomEntreprise());
+        contactSQL.setNom(contactDTO.getNomContact());
+        contactSQL.setPrenom(contactDTO.getPrenomContact());
+        contactSQL.setDescription(contactDTO.getDescription());
+        contactSQL.setTelephone(contactDTO.getTelephone());
+        contactSQL.setAdresse(contactDTO.getAdresse());
+        contactSQL.setUtilisateur(utilisateur);
 
         id = 1L;
         //utilisateur.setId(1L);
@@ -85,17 +102,6 @@ class ContactServiceTest {
 
     @Test
     void creerContactTest() {
-
-        Contact contactSQL = new Contact();
-        contactSQL.setId(id);
-        contactSQL.setEntreprise(contactDTO.getNomEntreprise());
-        contactSQL.setNom(contactDTO.getNomContact());
-        contactSQL.setPrenom(contactDTO.getPrenomContact());
-        contactSQL.setDescription(contactDTO.getDescription());
-        contactSQL.setTelephone(contactDTO.getTelephone());
-        contactSQL.setAdresse(contactDTO.getAdresse());
-        contactSQL.setUtilisateur(utilisateur);
-
         contactMongo = new ContactMongo();
         contactMongo.set_id(id);
         contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
@@ -117,6 +123,40 @@ class ContactServiceTest {
 
         verify(interractionBdContact, times(1)).save(Mockito.any(Contact.class));
         verify(interractionMongoContact, times(1)).save(Mockito.any(ContactMongo.class));
+    }
+
+    @Test
+    void modifierContact(){
+        ContactDTO contactModifier = new ContactDTO();
+        contactModifier.setNomEntreprise("Nom entreprise de Test");
+        contactModifier.setAdresse("Adresse de test");
+        contactModifier.setDescription("description de test");
+        contactModifier.setPrenomContact("Prenom");
+        contactModifier.setNomContact("Nom");
+        contactModifier.setTelephone("+33698745612");
+        contactModifier.setLongitude(1.851270);
+        contactModifier.setLatitude(42.788370);
+
+        List<Contact> contactEnBD = new ArrayList<>();
+        contactEnBD.add(contactSQL);
+
+        contactMongo = new ContactMongo();
+        contactMongo.set_id(id);
+        contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
+
+        when(interractionMongoContact.findBy_id(Mockito.any(Long.class))).thenReturn(contactMongo);
+        when(interractionBdContact.findByUtilisateurAndId(Mockito.any(Utilisateur.class),Mockito.any(Long.class))).thenReturn(contactEnBD);
+
+        contactService.modifierContact(contactModifier,utilisateur,id);
+        Contact result = contactEnBD.getFirst();
+        assertEquals(contactModifier.getNomEntreprise(),result.getEntreprise());
+        assertEquals(contactModifier.getAdresse(), result.getAdresse());
+        assertEquals(contactModifier.getNomContact(),result.getNom());
+        assertEquals(contactModifier.getPrenomContact(),result.getPrenom());
+        assertEquals(contactModifier.getTelephone(), result.getTelephone());
+        assertEquals(contactModifier.getDescription(), result.getDescription());
+        assertEquals(contactModifier.getLongitude(),contactMongo.getLocation().getX());
+        assertEquals(contactModifier.getLatitude(), contactMongo.getLocation().getY());
     }
 
 }
