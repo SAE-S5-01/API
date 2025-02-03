@@ -2,6 +2,7 @@ package fr.iutrodez.sae501.apicliandcollect.contact;
 
 
 
+import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +54,11 @@ public class ControleurContact {
     }
 
     @PutMapping("/contact")
-    public ResponseEntity<String> modifierClient(@Valid @RequestBody ContactDTO contactModifier, @RequestParam String id, Authentication utilisateur) {
+    public ResponseEntity<ReponseTextuelle> modifierClient(@Valid @RequestBody ContactDTO contactModifier, @RequestParam String id, Authentication utilisateur) {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long ID = Long.parseLong(id);
         service.modifierContact(contactModifier, u, ID);
-        return new ResponseEntity<>(SUCCES_MODIFICATION, HttpStatus.OK);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_MODIFICATION), HttpStatus.OK);
     }
 
     /**
@@ -67,9 +68,9 @@ public class ControleurContact {
      * @return Un message de succès
      */
     @DeleteMapping("/contact/{id}")
-    public ResponseEntity<String> supprimerContact(@PathVariable Long id, Authentication utilisateur) {
+    public ResponseEntity<ReponseTextuelle> supprimerContact(@PathVariable Long id, Authentication utilisateur) {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         service.supprimerContact(u, id);
-        return new ResponseEntity<>(SUCCES_SUPPRESSION, HttpStatus.OK);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION), HttpStatus.OK);
     }
 }
