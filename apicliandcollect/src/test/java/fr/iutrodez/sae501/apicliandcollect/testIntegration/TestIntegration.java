@@ -16,6 +16,14 @@ import java.util.HashMap;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Cette classe permet de réaliser tous les tests d'intégration de l'API.
+ * Tous les tests d'intégration sont regroupés dans la même classe et sont ordonnés
+ * grâce à l'annotation @Order(), en attendant de trouver une meilleure solution.
+ *
+ * Pour effectuer les tests unitaires, on utilise MockMvc pour simuler les appels à l'API,
+ * et on a défini une base de données de test dans le fichier properties.
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,properties = "spring.config.name=application-test")
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -24,8 +32,10 @@ class TestIntegration {
     @Autowired
     private MockMvc mockMvc;
 
+    // Route api pour la partit contact
     private final static String ROUTE_API = "/api/contact";
 
+    // Base de la route api utilisateur
     private static final String BASE_API_UTILISATEUR = "/api/utilisateur/";
 
     private static final String CLIENT_AVANT_MODIF = """
@@ -203,6 +213,11 @@ class TestIntegration {
                 .andExpect(status().isOk());
     }
 
+    /**
+     * Méthode qui vient initialiser une connexion à l'API afin de tester toute la partie contact :
+     * C'est-à-dire la création, la modification et la récupération des contacts.
+     * @throws Exception
+     */
     @BeforeEach
     void setUp() throws Exception {
         String utilisateur = """
