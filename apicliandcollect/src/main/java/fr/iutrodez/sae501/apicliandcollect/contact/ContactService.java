@@ -45,8 +45,8 @@ public class ContactService {
         return contactEnJson(resultat , localisation);
     }
 
-    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id){
-        Contact contacAmodifier =interractionBdContact.findByUtilisateurAndId(u,id).getFirst();
+    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
+        Contact contacAmodifier = interractionBdContact.findByUtilisateurAndId(u, id).getFirst();
         contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
         contacAmodifier.setDescription(contactModifier.getDescription());
         contacAmodifier.setAdresse(contactModifier.getAdresse());
@@ -58,6 +58,17 @@ public class ContactService {
         contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
         interractionMongoContact.save(contactMongoAmodifier);
         interractionBdContact.save(contacAmodifier);
+    }
+
+    /**
+     * Supprime le contact d'id id
+     * @param id l'id du contact à supprimer
+     */
+    public void supprimerContact(Utilisateur u, Long id) {
+        Contact contact = interractionBdContact.findByUtilisateurAndId(u, id).getFirst();
+        interractionBdContact.delete(contact);
+        interractionMongoContact.delete(interractionMongoContact.findBy_id(id));
+        // TODO : vérifier si besoin suppression autre...
     }
 
     /**

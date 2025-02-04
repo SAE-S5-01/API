@@ -61,6 +61,9 @@ jobs:
           echo "SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}" >> .env
           echo "SECURITY_JWT_SECRET_KEY=${{ secrets.SECURITY_JWT_SECRET_KEY }}" >> .env
           echo "SECURITY_JWT_EXPIRATION_TIME=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> .env
+          echo "SERVER_SERVLET_ENCODING_CHARSET=${{ secrets.SERVER_SERVLET_ENCODING_CHARSET }}" >> .env
+          echo "SERVER_SERVLET_ENCODING_ENABLED=${{ secrets.SERVER_SERVLET_ENCODING_ENABLED }}" >> .env
+          echo "SERVER_SERVLET_ENCODING_FORCE=${{ secrets.SERVER_SERVLET_ENCODING_FORCE }}" >> .env
 
       - name: Copier les fichiers nécessaires vers le serveur
         # Transfère les fichiers requis pour le déploiement vers le serveur distant
