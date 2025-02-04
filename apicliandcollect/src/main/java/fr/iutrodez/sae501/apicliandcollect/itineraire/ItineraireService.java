@@ -5,6 +5,7 @@ import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;

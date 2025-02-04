@@ -54,13 +54,7 @@ public class    ControleurItineraire {
         String listeItineraire = itineraireService.listeItineraire(idCreateur);
         return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
     }
-
-    @PostMapping("/itineraire")
-    public ResponseEntity<ItineraireToApp> creerItineraire(@Valid @RequestBody ItineraireDTO itineraire) {
-        ItineraireToApp itineraireCree = itineraireService.creerItineraire(itineraire);
-        return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
-    }
-
+    
     /**
      * Supprime un itinéraire de l'utilisateur connecté.
      * @param id L'identifiant de l'itinéraire à supprimer (passé dans l'URL)
