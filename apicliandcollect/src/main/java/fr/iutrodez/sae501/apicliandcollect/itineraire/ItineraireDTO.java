@@ -17,7 +17,6 @@ public class ItineraireDTO {
     @Size(max = 50, message = "Le nom de l'itinéraire ne doit pas dépasser 50 caractères")
     private String nomItineraire;
 
-
     @NotNull(message = "L'identifiant du créateur de l'itinéraire est obligatoire")
     private long idCreateur;
 

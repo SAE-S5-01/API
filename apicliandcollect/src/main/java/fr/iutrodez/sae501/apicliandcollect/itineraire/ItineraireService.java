@@ -1,5 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
+import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
@@ -56,6 +57,16 @@ public class ItineraireService {
 
         interractionMongoItineraire.save(insertion);
         return formattageItineraire(insertion); // STUB
+    }
+
+    /**
+     * Supprime le contact d'id id
+     * @param id l'id du contact à supprimer
+     */
+    public void supprimerItineraire(Utilisateur u, String id) {
+        Itineraire itineraire = interractionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
+        interractionMongoItineraire.delete(itineraire);
+        // TODO : vérifier si besoin suppression autre...
     }
 
     public ArrayList<ItineraireToApp> listeItineraire(Long idCreateur) {
