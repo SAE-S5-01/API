@@ -28,7 +28,7 @@ public class UtilisateurDTO {
 
     @NotBlank(message = "Votre email est obligatoire")
     @Email(message = "Adresse email non valide : ex. johndoe@gmail.com")
-    @Size(max = 20, message = "Votre email ne peut pas contenir plus de 200 caractères")
+    @Size(max = 200, message = "Votre email ne peut pas contenir plus de 200 caractères")
     @UniqueEmail
     private String mail;
 
@@ -63,11 +63,11 @@ public class UtilisateurDTO {
     @Component
     public static class EmailUniqueValidator implements ConstraintValidator<UniqueEmail, String> {
         @Autowired
-        private InterractionBdUtilisateur interractionBdUtilisateur;
+        private InteractionBdUtilisateur interactionBdUtilisateur;
 
         @Override
         public boolean isValid(String mail, ConstraintValidatorContext context) {
-            return mail != null && !interractionBdUtilisateur.existsByMail(mail);
+            return mail != null && !interactionBdUtilisateur.existsByMail(mail);
         }
     }
 }
