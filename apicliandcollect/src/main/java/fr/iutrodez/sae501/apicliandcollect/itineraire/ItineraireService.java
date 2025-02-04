@@ -1,3 +1,8 @@
+/*
+ * ItineraireService.java                                                                                   04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
+
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -109,12 +114,12 @@ public class ItineraireService {
      * @throws JsonProcessingException
      */
     public String formattageItineraire(LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
-        ArrayList<listeEtapeItineraireSerializer> itineraireList = new ArrayList<>();
+        ArrayList<ListeEtapesItineraireSerializer> itineraireList = new ArrayList<>();
         // Le domicile est une étape mais non un CONTACT d'où l'id "bidon"
         Point domicile = listeClients.get(-1L);
 
         // Ajouter le point de départ
-        itineraireList.add(new listeEtapeItineraireSerializer(-1L, "Départ", domicile.getY(), domicile.getX()));
+        itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Départ", domicile.getY(), domicile.getX()));
 
         // Enlever le domicile de la liste pour éviter une null pointer dans la boucle
         listeClients.remove(-1L);
@@ -123,11 +128,11 @@ public class ItineraireService {
         for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
             Long id = entry.getKey();
             Point point = entry.getValue();
-            itineraireList.add(new listeEtapeItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
+            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
         }
 
         // Ajouter le point d'arrivée
-        itineraireList.add(new listeEtapeItineraireSerializer(-1L, "Arrivée", domicile.getY(), domicile.getX()));
+        itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Arrivée", domicile.getY(), domicile.getX()));
 
         // Convertir la liste en JSON et l'encapsuler dans un objet
         ObjectMapper objectMapper = new ObjectMapper();

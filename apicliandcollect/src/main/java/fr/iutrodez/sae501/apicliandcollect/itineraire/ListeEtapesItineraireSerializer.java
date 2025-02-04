@@ -1,3 +1,8 @@
+/*
+ * ListeEtapesItineraireSerializer.java                                                                     04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
+
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class listeEtapeItineraireSerializer {
+public class ListeEtapesItineraireSerializer {
     @JsonProperty("id")
     private Long id;
 
@@ -29,7 +34,7 @@ public class listeEtapeItineraireSerializer {
      * @param latitude
      * @param longitude
      */
-    public listeEtapeItineraireSerializer(Long id, String nom, double latitude, double longitude) {
+    public ListeEtapesItineraireSerializer(Long id, String nom, double latitude, double longitude) {
         this.id = id;
         this.nom = nom;
         this.latitude = latitude;
@@ -37,5 +42,5 @@ public class listeEtapeItineraireSerializer {
     }
 
     // Obligatoire pour Jackson
-    public listeEtapeItineraireSerializer() {}
+    public ListeEtapesItineraireSerializer() {}
 }
