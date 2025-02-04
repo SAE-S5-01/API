@@ -1,6 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.securite;
 
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class ServiceAuthentification {
 
     // Référence à la classe d'interaction avec la base de données pour les utilisateurs.
-    private final InterractionBdUtilisateur interractionBdUtilisateur;
+    private final InteractionBdUtilisateur interactionBdUtilisateur;
 
     // Encodeur utilisé pour chiffrer et comparer les mots de passe des utilisateurs.
     private final PasswordEncoder passwordEncoder;
@@ -29,17 +29,17 @@ public class ServiceAuthentification {
     /**
      * Constructeur du service d'authentification.
      *
-     * @param interractionBdUtilisateur Interface pour interagir avec la base de données des utilisateurs.
+     * @param interactionBdUtilisateur Interface pour interagir avec la base de données des utilisateurs.
      * @param authenticationManager Gestionnaire d'authentification de Spring Security.
      * @param passwordEncoder Composant pour encoder et comparer les mots de passe.
      */
     public ServiceAuthentification(
-            InterractionBdUtilisateur interractionBdUtilisateur,
+            InteractionBdUtilisateur interactionBdUtilisateur,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder
     ) {
         this.authenticationManager = authenticationManager;
-        this.interractionBdUtilisateur = interractionBdUtilisateur;
+        this.interactionBdUtilisateur = interactionBdUtilisateur;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -63,7 +63,7 @@ public class ServiceAuthentification {
         );
 
         // Récupère l'utilisateur dans la base de données à partir de son email.
-        return interractionBdUtilisateur.findByMail(mail)
+        return interactionBdUtilisateur.findByMail(mail)
                 .orElseThrow(); // Lance une exception si l'utilisateur n'existe pas.
     }
 }

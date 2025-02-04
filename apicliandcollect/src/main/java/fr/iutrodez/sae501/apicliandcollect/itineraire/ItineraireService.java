@@ -1,9 +1,8 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
-import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,13 @@ import java.util.*;
 public class ItineraireService {
 
     @Autowired
-    private InterractionMongoItineraire interractionMongoItineraire;
+    private InteractionMongoItineraire interactionMongoItineraire;
 
     @Autowired
-    private InterractionBdUtilisateur interractionBdUtilisateur;
+    private InteractionBdUtilisateur interactionBdUtilisateur;
 
     @Autowired
-    private InterractionBdContact interractionBdContact;
+    private InteractionBdContact interactionBdContact;
 
 
     // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
@@ -45,7 +44,7 @@ public class ItineraireService {
         Collection<Point> listeCoordonne = itineraire.getListePoint().values();
         String nomItineraire = itineraire.getNomItineraire();
 
-        if (!interractionBdUtilisateur.existsById(idCreateur)) {
+        if (!interactionBdUtilisateur.existsById(idCreateur)) {
             // TODO Meilleure gestion de l'erreur renvoie une erreur 500  , renvoyer une erreur 401 avec une exception personnalisée
             throw new IllegalArgumentException("L'utilisateur n'existe pas");
         }
@@ -62,7 +61,7 @@ public class ItineraireService {
         GeoJsonLineString geoJsonLineString = new GeoJsonLineString(new ArrayList<>(listeCoordonne));
         insertion.setLineStringCoordonnees(geoJsonLineString);
 
-        interractionMongoItineraire.save(insertion);
+        interactionMongoItineraire.save(insertion);
         return formattageItineraire(insertion);
     }
 
@@ -71,8 +70,8 @@ public class ItineraireService {
      * @param id l'id du contact à supprimer
      */
     public void supprimerItineraire(Utilisateur u, String id) {
-        Itineraire itineraire = interractionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
-        interractionMongoItineraire.delete(itineraire);
+        Itineraire itineraire = interactionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
+        interactionMongoItineraire.delete(itineraire);
         // TODO : vérifier si besoin suppression autre...
     }
 
@@ -83,10 +82,10 @@ public class ItineraireService {
      * @throws JsonProcessingException Erreur de formatage JSON
      */
     public String listeItineraire(Long idCreateur) throws JsonProcessingException {
-        ArrayList<Itineraire> listeItineraire = interractionMongoItineraire.findByIdCreateur(idCreateur);
+        ArrayList<Itineraire> listeItineraire = interactionMongoItineraire.findByIdCreateur(idCreateur);
         ArrayList<ItineraireSerializer> itineraireList = new ArrayList<>();
         for (Itineraire i : listeItineraire) {
-            itineraireList.add(new ItineraireSerializer(i , interractionBdContact));
+            itineraireList.add(new ItineraireSerializer(i , interactionBdContact));
         }
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(itineraireList);
@@ -100,7 +99,7 @@ public class ItineraireService {
      */
     private String formattageItineraire(Itineraire i) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new ItineraireSerializer(i , interractionBdContact));
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new ItineraireSerializer(i , interactionBdContact));
     }
 
     /**
@@ -124,7 +123,7 @@ public class ItineraireService {
         for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
             Long id = entry.getKey();
             Point point = entry.getValue();
-            itineraireList.add(new listeEtapeItineraireSerializer(id, interractionBdContact.findNameById(id), point.getY(), point.getX()));
+            itineraireList.add(new listeEtapeItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
         }
 
         // Ajouter le point d'arrivée

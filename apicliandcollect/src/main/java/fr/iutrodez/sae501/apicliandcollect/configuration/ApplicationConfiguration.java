@@ -1,6 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.configuration;
 
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,15 +24,15 @@ public class ApplicationConfiguration {
 
     // Dépendance pour interagir avec la base de données des utilisateurs.
     @Autowired
-    private final InterractionBdUtilisateur interractionBdUtilisateur;
+    private final InteractionBdUtilisateur interactionBdUtilisateur;
 
     /**
-     * Constructeur de la classe avec injection de la dépendance `InterractionBdUtilisateur`.
+     * Constructeur de la classe avec injection de la dépendance `InteractionBdUtilisateur`.
      *
-     * @param interractionBdUtilisateur Composant pour interagir avec la base de données des utilisateurs.
+     * @param interactionBdUtilisateur Composant pour interagir avec la base de données des utilisateurs.
      */
-    public ApplicationConfiguration(InterractionBdUtilisateur interractionBdUtilisateur) {
-        this.interractionBdUtilisateur = interractionBdUtilisateur;
+    public ApplicationConfiguration(InteractionBdUtilisateur interactionBdUtilisateur) {
+        this.interactionBdUtilisateur = interactionBdUtilisateur;
     }
 
     /**
@@ -44,7 +44,7 @@ public class ApplicationConfiguration {
      */
     @Bean
     UserDetailsService userDetailsService() {
-        return username -> interractionBdUtilisateur.findByMail(username)
+        return username -> interactionBdUtilisateur.findByMail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
