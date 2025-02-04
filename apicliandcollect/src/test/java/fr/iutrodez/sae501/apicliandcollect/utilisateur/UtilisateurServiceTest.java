@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -21,7 +22,10 @@ import static org.mockito.Mockito.*;
 class UtilisateurServiceTest {
 
     @Mock
-    private InterractionBdUtilisateur interractionBdUtilisateur;
+    private InteractionBdUtilisateur interactionBdUtilisateur;
+
+    @Mock
+    private InteractionMongoUtilisateur interactionMongoUtilisateur;
 
     @Mock
     private PasswordEncoder encoderMotPasse;
@@ -30,6 +34,8 @@ class UtilisateurServiceTest {
     private UtilisateurService utilisateurService;
 
     private UtilisateurDTO utilisateurDTO;
+
+    Long id = 1L;
 
     @BeforeEach
     public void setUp() {
@@ -40,8 +46,11 @@ class UtilisateurServiceTest {
         utilisateurDTO.setMail("test.ju@test.com");
         utilisateurDTO.setMotDePasse("mdpTest1!");
         utilisateurDTO.setAdresse("AdresseTest");
+        utilisateurDTO.setLongitude(54.123);
+        utilisateurDTO.setLatitude(76.1245);
 
-        //encoderMotPasse = Mockito.mock(PasswordEncoder.class);
+        utilisateurService = new UtilisateurService();
+
         MockitoAnnotations.initMocks(this);
     }
 
@@ -53,14 +62,20 @@ class UtilisateurServiceTest {
         when(encoderMotPasse.encode(utilisateurDTO.getMotDePasse())).thenReturn(motDePasseEncode);
 
         Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setId(id);
         utilisateur.setNom(utilisateurDTO.getNom());
         utilisateur.setPrenom(utilisateurDTO.getPrenom());
         utilisateur.setMail(utilisateurDTO.getMail());
         utilisateur.setMotDePasse(motDePasseEncode);
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
 
-        // Simulation sauvegarde dans la base de données
-        when(interractionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
+        UtilisateurMongo utilisateurMongo = new UtilisateurMongo();
+        utilisateurMongo.set_id(utilisateur.getId());
+        utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurDTO.getLongitude(), utilisateurDTO.getLatitude()));
+
+        // Simulation sauvegarde dans les bases de données
+        when(interactionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
+        when(interactionMongoUtilisateur.save(Mockito.any(UtilisateurMongo.class))).thenReturn(utilisateurMongo);
 
         UtilisateurDTO result = utilisateurService.creerUtilisateur(utilisateurDTO);
         assertNotNull(result);
@@ -68,10 +83,14 @@ class UtilisateurServiceTest {
         assertEquals("PrenomTest", result.getPrenom());
         assertEquals("test.ju@test.com", result.getMail());
         assertEquals(motDePasseEncode, result.getMotDePasse());
+        assertNotEquals("mdpTest1!", result.getMotDePasse());
         assertEquals("AdresseTest", result.getAdresse());
+        assertEquals(54.123, result.getLongitude());
+        assertEquals(76.1245, result.getLatitude());
 
         verify(encoderMotPasse, times(1)).encode(utilisateurDTO.getMotDePasse());
-        verify(interractionBdUtilisateur, times(1)).save(Mockito.any(Utilisateur.class));
+        verify(interactionBdUtilisateur, times(1)).save(Mockito.any(Utilisateur.class));
+        verify(interactionMongoUtilisateur, times(1)).save(Mockito.any(UtilisateurMongo.class));
     }
 
     @Test
@@ -84,9 +103,11 @@ class UtilisateurServiceTest {
         utilisateur.setMotDePasse(utilisateurDTO.getMotDePasse());
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
 
+        doNothing().when(interactionBdUtilisateur).delete(Mockito.any(Utilisateur.class));
+
         utilisateurService.supprimerUtilisateur(utilisateur);
 
-        verify(interractionBdUtilisateur, times(1)).delete(utilisateur);
+        verify(interactionBdUtilisateur, times(1)).delete(utilisateur);
     }
 
 }

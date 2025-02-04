@@ -1,3 +1,8 @@
+/*
+ * ConfigurationSecurite.java                                                                               04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
+
 package fr.iutrodez.sae501.apicliandcollect.configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -58,20 +63,20 @@ public class ConfigurationSecurite {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable) // Désactivation de la protection CSRF.
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                            // Permet un accès sans authentification aux endpoints spécifiés.
-                            .requestMatchers("/api/utilisateur/connexion", "/api/utilisateur/inscription", "/api/apijoignable").permitAll()
-                            // Toutes les autres requêtes nécessitent une authentification.
-                            .anyRequest().authenticated()
-                )
-                .sessionManagement(sessionManagement ->
-                        // Utilisation de sessions sans état (stateless) pour une API REST sécurisée.
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authenticationProvider) // Configuration du fournisseur d'authentification.
-                .addFilterBefore(filtreJwt, UsernamePasswordAuthenticationFilter.class) // Ajout du filtre JWT avant le filtre d'authentification standard.
-                .build();
+            .authorizeHttpRequests(authorizeRequests ->
+                authorizeRequests
+                    // Permet un accès sans authentification aux endpoints spécifiés.
+                    .requestMatchers("/api/utilisateur/connexion", "/api/utilisateur/inscription", "/api/apijoignable").permitAll()
+                    // Toutes les autres requêtes nécessitent une authentification.
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(sessionManagement ->
+                // Utilisation de sessions sans état (stateless) pour une API REST sécurisée.
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authenticationProvider(authenticationProvider) // Configuration du fournisseur d'authentification.
+            .addFilterBefore(filtreJwt, UsernamePasswordAuthenticationFilter.class) // Ajout du filtre JWT avant le filtre d'authentification standard.
+            .build();
     }
 
     /**

@@ -1,5 +1,9 @@
-package fr.iutrodez.sae501.apicliandcollect.contact;
+/*
+ * ContactService.java                                                                                      04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
 
+package fr.iutrodez.sae501.apicliandcollect.contact;
 
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.transaction.Transactional;
@@ -14,10 +18,10 @@ import java.util.stream.Collectors;
 public class ContactService {
 
     @Autowired
-    private InterractionBdContact interractionBdContact;
+    private InteractionBdContact interactionBdContact;
 
     @Autowired
-    private InterractionMongoContact interractionMongoContact;
+    private InteractionMongoContact interactionMongoContact;
 
     /**
      * Crée un nouveau contact pour l'utilisateur u
@@ -38,11 +42,37 @@ public class ContactService {
         contact.setTelephone(contactAajoute.getTelephone());
         contact.setProspect(contactAajoute.isProspect());
         contact.setUtilisateur(u);
-        Contact resultat = interractionBdContact.save(contact);
+        Contact resultat = interactionBdContact.save(contact);
         contactMongo.set_id(resultat.getId());
         contactMongo.setLocation(new GeoJsonPoint(contactAajoute.getLongitude(), contactAajoute.getLatitude()));
-        ContactMongo localisation = interractionMongoContact.save(contactMongo);
+        ContactMongo localisation = interactionMongoContact.save(contactMongo);
         return contactEnJson(resultat , localisation);
+    }
+
+    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
+        Contact contacAmodifier = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
+        contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
+        contacAmodifier.setDescription(contactModifier.getDescription());
+        contacAmodifier.setAdresse(contactModifier.getAdresse());
+        contacAmodifier.setTelephone(contactModifier.getTelephone());
+        contacAmodifier.setNom(contactModifier.getNomContact());
+        contacAmodifier.setPrenom(contactModifier.getPrenomContact());
+        contacAmodifier.setProspect(contactModifier.isProspect());
+        ContactMongo contactMongoAmodifier = interactionMongoContact.findBy_id(id);
+        contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
+        interactionMongoContact.save(contactMongoAmodifier);
+        interactionBdContact.save(contacAmodifier);
+    }
+
+    /**
+     * Supprime le contact d'id id
+     * @param id l'id du contact à supprimer
+     */
+    public void supprimerContact(Utilisateur u, Long id) {
+        Contact contact = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
+        interactionBdContact.delete(contact);
+        interactionMongoContact.delete(interactionMongoContact.findBy_id(id));
+        // TODO : vérifier si besoin suppression autre...
     }
 
     /**
@@ -52,8 +82,8 @@ public class ContactService {
      * @return la liste des contacts de l'utilisateur
      */
     public List<ContactDTO> listeContact(Utilisateur u) {
-        List<Contact> contacts = interractionBdContact.findByUtilisateur(u);
-        List<ContactMongo> localisations = interractionMongoContact.findAll();
+        List<Contact> contacts = interactionBdContact.findByUtilisateur(u);
+        List<ContactMongo> localisations = interactionMongoContact.findAll();
         return contacts.stream().map(contact -> {
             ContactMongo localisation = localisations.stream().filter(loc -> loc.get_id() == contact.getId())
                 .findFirst().get();
@@ -70,6 +100,8 @@ public class ContactService {
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
+        contactDTO.setID(contact.getId());
+        contactDTO.setNomEntreprise(contact.getEntreprise());
         contactDTO.setNomContact(contact.getNom());
         contactDTO.setPrenomContact(contact.getPrenom());
         contactDTO.setAdresse(contact.getAdresse());

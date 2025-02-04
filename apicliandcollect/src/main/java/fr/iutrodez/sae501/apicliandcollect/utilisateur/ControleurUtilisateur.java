@@ -1,6 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
-import fr.iutrodez.sae501.apicliandcollect.exceptions.ErreurControleurUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceAuthentification;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceJwt;
 import jakarta.validation.Valid;
@@ -9,11 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +28,7 @@ public class ControleurUtilisateur {
     private UtilisateurService service;
 
     @Autowired
-    private InterractionBdUtilisateur interractionBdUtilisateur;
+    private InteractionBdUtilisateur interactionBdUtilisateur;
 
     @Autowired
     private ServiceAuthentification serviceAuthentification;
@@ -42,10 +39,8 @@ public class ControleurUtilisateur {
     @Autowired
     private PasswordEncoder encoderMotPasse;
 
-    private static final String SUCCES_INSCRIPTION = "Utilisateur inscrit avec succès";
     private static final String SUCCES_CONNEXION = "Utilisateur connecté avec succès";
     private static final String SUCCES_SUPPRESSION = "Compte supprimé avec succès";
-    private static final String ERREUR_SUPPRESSION = "Suppression du compte impossible";
     
     /**
      * Inscrit un nouvel utilisateur.
@@ -88,9 +83,9 @@ public class ControleurUtilisateur {
      * @return un message de succès et un code de statut 200 (OK)
      */
     @PutMapping("/suppresionCompte")
-    public ResponseEntity<String> supprimerCompte(Authentication authentication) {
+    public ResponseEntity<ReponseTextuelle> supprimerCompte(Authentication authentication) {
         Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
         service.supprimerUtilisateur(utilisateur);
-        return new ResponseEntity<>(SUCCES_SUPPRESSION ,HttpStatus.OK);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION) ,HttpStatus.OK);
     }
 }
