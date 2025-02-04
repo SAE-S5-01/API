@@ -1,16 +1,15 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Optional;
+
+import java.util.*;
 
 @Service
 public class ItineraireService {
@@ -26,15 +25,22 @@ public class ItineraireService {
 
 
     // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
-    public LinkedHashMap<Long, Point> calculerItineraire(
-            LinkedHashMap<Long, Point> listeClients) {
-        return listeClients; // STUB
+    public String calculerItineraire(
+            LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
+        LinkedHashMap<String , Point> listeClientsFormatte = new LinkedHashMap<>();
+        return formattageItineraire(listeClients);
     }
 
-    public ItineraireToApp creerItineraire(ItineraireDTO itineraire) {
+    /**
+     * Créer un itinéraire
+     * @param idCreateur ID de l'utilisateur créant l'itinéraire
+     * @param itineraire Objet contenant les informations de l'itinéraire
+     * @return L'itinéraire créé
+     * @throws JsonProcessingException Erreur de formatage JSON
+     */
+    public String creerItineraire(long idCreateur , ListeClientDTO itineraire) throws JsonProcessingException {
 
-        long idCreateur = itineraire.getIdCreateur();
-        Collection<Point> listeCoordonne = itineraire.getOrdreClients().values();
+        Collection<Point> listeCoordonne = itineraire.getListePoint().values();
         String nomItineraire = itineraire.getNomItineraire();
 
         if (!interractionBdUtilisateur.existsById(idCreateur)) {
@@ -48,39 +54,79 @@ public class ItineraireService {
         }
         insertion.setIdCreateur(idCreateur);
 
-        ArrayList<Long> listeContact = new ArrayList<>(itineraire.getOrdreClients().keySet());
+        ArrayList<Long> listeContact = new ArrayList<>(itineraire.getListePoint().keySet());
         insertion.setListeIdContact(listeContact);
 
         GeoJsonLineString geoJsonLineString = new GeoJsonLineString(new ArrayList<>(listeCoordonne));
         insertion.setLineStringCoordonnees(geoJsonLineString);
 
         interractionMongoItineraire.save(insertion);
-        return formattageItineraire(insertion); // STUB
+        return formattageItineraire(insertion);
     }
 
-    public ArrayList<ItineraireToApp> listeItineraire(Long idCreateur) {
+    /**
+     * Récupérer la liste des itinéraires d'un utilisateur
+     * @param idCreateur ID de l'utilisateur
+     * @return La liste des itinéraires de l'utilisateur
+     * @throws JsonProcessingException Erreur de formatage JSON
+     */
+    public String listeItineraire(Long idCreateur) throws JsonProcessingException {
         ArrayList<Itineraire> listeItineraire = interractionMongoItineraire.findByIdCreateur(idCreateur);
-        ArrayList<ItineraireToApp> listeItineraireFormatte = new ArrayList<>();
-        for(Itineraire i : listeItineraire) {
-            listeItineraireFormatte.add(formattageItineraire(i));
+        ArrayList<ItineraireSerializer> itineraireList = new ArrayList<>();
+        for (Itineraire i : listeItineraire) {
+            itineraireList.add(new ItineraireSerializer(i , interractionBdContact));
         }
-        return listeItineraireFormatte;
-
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(itineraireList);
     }
 
-    private ItineraireToApp formattageItineraire(Itineraire i) {
-        ItineraireToApp itineraire = new ItineraireToApp();
-        itineraire.setNomItineraire(i.getNomItineraire());
-        itineraire.setIdItineraire(i.get_id());
-        LinkedHashMap<Long , String> listeClient = new LinkedHashMap<>();
-        // associe le nom a l'id dans l'ordre des clients ou null si le nom est vide
-        i.getListeIdContact().forEach(id ->
-            listeClient.put(id, Optional.ofNullable(interractionBdContact.findNameById(id))
-                .filter(name -> !name.trim().isEmpty()).orElse(null))
-        );
-
-        itineraire.setOrdreClients(listeClient);
-        itineraire.setGeoJsonLineString(i.getLineStringCoordonnees());
-        return itineraire;
+    /**
+     * Formater un itinéraire en JSON
+     * @param i Itinéraire à formater
+     * @return L'itinéraire formaté en JSON
+     * @throws JsonProcessingException
+     */
+    private String formattageItineraire(Itineraire i) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new ItineraireSerializer(i , interractionBdContact));
     }
+
+    /**
+     * Formater une liste d'étape d'itinéraire en JSON
+     * @param listeClients Liste des étapes de l'itinéraire
+     * @return La liste des étapes formatée en JSON
+     * @throws JsonProcessingException
+     */
+    public String formattageItineraire(LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
+        ArrayList<listeEtapeItineraireSerializer> itineraireList = new ArrayList<>();
+        // Le domicile est une étape mais non un CONTACT d'où l'id "bidon"
+        Point domicile = listeClients.get(-1L);
+
+        // Ajouter le point de départ
+        itineraireList.add(new listeEtapeItineraireSerializer(-1L, "Départ", domicile.getY(), domicile.getX()));
+
+        // Enlever le domicile de la liste pour éviter une null pointer dans la boucle
+        listeClients.remove(-1L);
+
+        // Ajouter les clients avec leurs ID
+        for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
+            Long id = entry.getKey();
+            Point point = entry.getValue();
+            itineraireList.add(new listeEtapeItineraireSerializer(id, interractionBdContact.findNameById(id), point.getY(), point.getX()));
+        }
+
+        // Ajouter le point d'arrivée
+        itineraireList.add(new listeEtapeItineraireSerializer(-1L, "Arrivée", domicile.getY(), domicile.getX()));
+
+        // Convertir la liste en JSON et l'encapsuler dans un objet
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Créer un objet avec la clé "itineraire" qui contient la liste
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        result.put("itineraire", itineraireList);
+
+        // Convertir l'objet final en JSON
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+    }
+
 }

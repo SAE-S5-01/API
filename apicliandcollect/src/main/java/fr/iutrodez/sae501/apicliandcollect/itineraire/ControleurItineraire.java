@@ -1,6 +1,7 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -21,24 +21,32 @@ public class    ControleurItineraire {
     private ItineraireService itineraireService;
 
     @PostMapping("/itineraire/calculer")
-    public ResponseEntity<LinkedHashMap<Long, Point>> verifierListe(@Valid @RequestBody ListeClientDTO utilisateurInscrit) {
+    public ResponseEntity<String> verifierListe(@Valid @RequestBody ListeClientDTO listePoint) throws JsonProcessingException {
 
-        LinkedHashMap<Long, Point> itineraireCalcule = itineraireService.calculerItineraire(utilisateurInscrit.getListePoint());
+        LinkedHashMap<Long, Point> liste = listePoint.getListePoint();
+        /*
+         * Ajout du domicile en premier élément de la liste , id -1 car sera retiré plus tard.
+         */
+        liste.putFirst(-1L, listePoint.getDomicile());
+        String itineraireCalcule = itineraireService.calculerItineraire(liste);
         return new ResponseEntity<>(itineraireCalcule, HttpStatus.OK);
 
     }
 
     @PostMapping("/itineraire")
-    public ResponseEntity<ItineraireToApp> creerItineraire(@Valid @RequestBody ItineraireDTO itineraire) {
-        ItineraireToApp itineraireCree = itineraireService.creerItineraire(itineraire);
+    public ResponseEntity<String> creerItineraire(Authentication utilisateur , @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        Long idCreateur = u.getId();
+
+        String itineraireCree = itineraireService.creerItineraire(idCreateur , itineraire);
         return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
     }
 
     @GetMapping("/itineraire")
-    public ResponseEntity<ArrayList<ItineraireToApp>> getItineraire(Authentication utilisateur) {
+    public ResponseEntity<String> getItineraire(Authentication utilisateur) throws JsonProcessingException {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long idCreateur = u.getId();
-        ArrayList<ItineraireToApp> listeItineraire = itineraireService.listeItineraire(idCreateur);
+        String listeItineraire = itineraireService.listeItineraire(idCreateur);
         return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
     }
 }

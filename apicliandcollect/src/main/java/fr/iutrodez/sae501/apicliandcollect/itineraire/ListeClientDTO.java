@@ -10,6 +10,10 @@ import java.util.LinkedHashMap;
 @Getter
 public class ListeClientDTO {
 
+    private Point domicile;
+
+    private String nomItineraire;
+
     @ValidateMap
     private LinkedHashMap<Long , Point> listePoint;
 
