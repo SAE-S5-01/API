@@ -2,6 +2,7 @@ package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,10 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 public class    ControleurItineraire {
+
+    private static final String SUCCES_MODIFICATION = "Itinéraire modifié avec succès";
+
+    private static final String SUCCES_SUPPRESSION = "Itinéraire supprimé avec succès";
 
     @Autowired
     private ItineraireService itineraireService;
@@ -48,5 +53,24 @@ public class    ControleurItineraire {
         Long idCreateur = u.getId();
         String listeItineraire = itineraireService.listeItineraire(idCreateur);
         return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
+    }
+
+    @PostMapping("/itineraire")
+    public ResponseEntity<ItineraireToApp> creerItineraire(@Valid @RequestBody ItineraireDTO itineraire) {
+        ItineraireToApp itineraireCree = itineraireService.creerItineraire(itineraire);
+        return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
+    }
+
+    /**
+     * Supprime un itinéraire de l'utilisateur connecté.
+     * @param id L'identifiant de l'itinéraire à supprimer (passé dans l'URL)
+     * @param utilisateur L'utilisateur connecté
+     * @return Un message de succès
+     */
+    @DeleteMapping("/itineraire/{id}")
+    public ResponseEntity<ReponseTextuelle> supprimerItineraire(@PathVariable String id, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        itineraireService.supprimerItineraire(u, id);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION), HttpStatus.OK);
     }
 }

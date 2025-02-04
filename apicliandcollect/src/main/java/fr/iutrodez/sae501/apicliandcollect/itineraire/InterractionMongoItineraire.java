@@ -9,4 +9,6 @@ import java.util.ArrayList;
 public interface InterractionMongoItineraire extends MongoRepository<Itineraire, String> {
 
     ArrayList<Itineraire> findByIdCreateur(Long idCreateur);
+
+    Itineraire findBy_idAndIdCreateur(String id, Long idCreateur);
 }

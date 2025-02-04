@@ -1,6 +1,7 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InterractionBdUtilisateur;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +63,16 @@ public class ItineraireService {
 
         interractionMongoItineraire.save(insertion);
         return formattageItineraire(insertion);
+    }
+
+    /** 
+     * Supprime le contact d'id id
+     * @param id l'id du contact à supprimer
+     */
+    public void supprimerItineraire(Utilisateur u, String id) {
+        Itineraire itineraire = interractionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
+        interractionMongoItineraire.delete(itineraire);
+        // TODO : vérifier si besoin suppression autre...
     }
 
     /**
