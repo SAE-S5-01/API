@@ -1,6 +1,11 @@
+/*
+ * MapKeyValidator.java                                                                                     04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
+
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
-import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
+import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +20,7 @@ import java.util.Map;
 public class MapKeyValidator implements ConstraintValidator<ValidateMap, Map<Long, Point>> {
 
     @Autowired
-    private InterractionBdContact client;
+    private InteractionBdContact client;
 
     private static final int MAX_X = 180;
     private static final int MIN_X = -180;

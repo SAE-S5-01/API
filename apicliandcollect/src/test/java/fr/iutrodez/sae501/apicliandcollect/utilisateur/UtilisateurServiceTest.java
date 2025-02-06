@@ -1,6 +1,5 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
-import fr.iutrodez.sae501.apicliandcollect.contact.InterractionBdContact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -23,10 +22,10 @@ import static org.mockito.Mockito.*;
 class UtilisateurServiceTest {
 
     @Mock
-    private InterractionBdUtilisateur interractionBdUtilisateur;
+    private InteractionBdUtilisateur interactionBdUtilisateur;
 
     @Mock
-    private InterractionMongoUtilisateur interractionMongoUtilisateur;
+    private InteractionMongoUtilisateur interactionMongoUtilisateur;
 
     @Mock
     private PasswordEncoder encoderMotPasse;
@@ -75,8 +74,8 @@ class UtilisateurServiceTest {
         utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurDTO.getLongitude(), utilisateurDTO.getLatitude()));
 
         // Simulation sauvegarde dans les bases de données
-        when(interractionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
-        when(interractionMongoUtilisateur.save(Mockito.any(UtilisateurMongo.class))).thenReturn(utilisateurMongo);
+        when(interactionBdUtilisateur.save(Mockito.any(Utilisateur.class))).thenReturn(utilisateur);
+        when(interactionMongoUtilisateur.save(Mockito.any(UtilisateurMongo.class))).thenReturn(utilisateurMongo);
 
         UtilisateurDTO result = utilisateurService.creerUtilisateur(utilisateurDTO);
         assertNotNull(result);
@@ -90,8 +89,8 @@ class UtilisateurServiceTest {
         assertEquals(76.1245, result.getLatitude());
 
         verify(encoderMotPasse, times(1)).encode(utilisateurDTO.getMotDePasse());
-        verify(interractionBdUtilisateur, times(1)).save(Mockito.any(Utilisateur.class));
-        verify(interractionMongoUtilisateur, times(1)).save(Mockito.any(UtilisateurMongo.class));
+        verify(interactionBdUtilisateur, times(1)).save(Mockito.any(Utilisateur.class));
+        verify(interactionMongoUtilisateur, times(1)).save(Mockito.any(UtilisateurMongo.class));
     }
 
     @Test
@@ -104,11 +103,11 @@ class UtilisateurServiceTest {
         utilisateur.setMotDePasse(utilisateurDTO.getMotDePasse());
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
 
-        doNothing().when(interractionBdUtilisateur).delete(Mockito.any(Utilisateur.class));
+        doNothing().when(interactionBdUtilisateur).delete(Mockito.any(Utilisateur.class));
 
         utilisateurService.supprimerUtilisateur(utilisateur);
 
-        verify(interractionBdUtilisateur, times(1)).delete(utilisateur);
+        verify(interactionBdUtilisateur, times(1)).delete(utilisateur);
     }
 
 }

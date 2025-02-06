@@ -1,5 +1,9 @@
-package fr.iutrodez.sae501.apicliandcollect.itineraire;
+/*
+ * ControleurItineraire.java                                                                                04 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
 
+package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
@@ -25,6 +29,14 @@ public class    ControleurItineraire {
     @Autowired
     private ItineraireService itineraireService;
 
+    @GetMapping("/itineraire")
+    public ResponseEntity<String> getItineraire(Authentication utilisateur) throws JsonProcessingException {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        Long idCreateur = u.getId();
+        String listeItineraire = itineraireService.listeItineraire(idCreateur);
+        return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
+    }
+
     @PostMapping("/itineraire/calculer")
     public ResponseEntity<String> verifierListe(@Valid @RequestBody ListeClientDTO listePoint) throws JsonProcessingException {
 
@@ -39,20 +51,12 @@ public class    ControleurItineraire {
     }
 
     @PostMapping("/itineraire")
-    public ResponseEntity<String> creerItineraire(Authentication utilisateur ,@Valid @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
+    public ResponseEntity<String> creerItineraire(Authentication utilisateur, @Valid @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long idCreateur = u.getId();
 
-        String itineraireCree = itineraireService.creerItineraire(idCreateur , itineraire);
+        String itineraireCree = itineraireService.creerItineraire(idCreateur, itineraire);
         return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
-    }
-
-    @GetMapping("/itineraire")
-    public ResponseEntity<String> getItineraire(Authentication utilisateur) throws JsonProcessingException {
-        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
-        Long idCreateur = u.getId();
-        String listeItineraire = itineraireService.listeItineraire(idCreateur);
-        return new ResponseEntity<>(listeItineraire, HttpStatus.OK);
     }
     
     /**

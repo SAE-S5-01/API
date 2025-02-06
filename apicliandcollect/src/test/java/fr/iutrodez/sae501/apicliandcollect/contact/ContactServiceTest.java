@@ -7,8 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,10 +26,10 @@ import static org.mockito.Mockito.*;
 class ContactServiceTest {
 
     @Mock
-    private InterractionBdContact interractionBdContact;
+    private InteractionBdContact interactionBdContact;
 
     @Mock
-    private InterractionMongoContact interractionMongoContact;
+    private InteractionMongoContact interactionMongoContact;
 
     @Mock
     private Contact contact;
@@ -92,9 +90,9 @@ class ContactServiceTest {
         contactMongo = new ContactMongo();
         contactMongo.set_id(id);
         // Simule la récupération d'un contact par son id
-        when(interractionMongoContact.findById(id.toString())).thenReturn(java.util.Optional.of(contactMongo));
+        when(interactionMongoContact.findById(id.toString())).thenReturn(java.util.Optional.of(contactMongo));
 
-        ContactMongo result = interractionMongoContact.findById(id.toString()).orElse(null);
+        ContactMongo result = interactionMongoContact.findById(id.toString()).orElse(null);
 
         // Vérifie que le contact récupéré n'est pas null et a les bonnes informations
         assertThat(result).isNotNull();
@@ -107,8 +105,8 @@ class ContactServiceTest {
         contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
 
         // Simulation sauvegarde dans les bases de données
-        when(interractionBdContact.save(Mockito.any(Contact.class))).thenReturn(contactSQL);
-        when(interractionMongoContact.save(Mockito.any(ContactMongo.class))).thenReturn(contactMongo);
+        when(interactionBdContact.save(Mockito.any(Contact.class))).thenReturn(contactSQL);
+        when(interactionMongoContact.save(Mockito.any(ContactMongo.class))).thenReturn(contactMongo);
 
         ContactDTO result = contactService.creerContact(contactDTO, utilisateur);
         assertNotNull(result);
@@ -121,8 +119,8 @@ class ContactServiceTest {
         assertEquals(48.858370, result.getLatitude());
         assertEquals(2.294481, result.getLongitude());
 
-        verify(interractionBdContact, times(1)).save(Mockito.any(Contact.class));
-        verify(interractionMongoContact, times(1)).save(Mockito.any(ContactMongo.class));
+        verify(interactionBdContact, times(1)).save(Mockito.any(Contact.class));
+        verify(interactionMongoContact, times(1)).save(Mockito.any(ContactMongo.class));
     }
 
     @Test
@@ -144,8 +142,8 @@ class ContactServiceTest {
         contactMongo.set_id(id);
         contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
 
-        when(interractionMongoContact.findBy_id(Mockito.any(Long.class))).thenReturn(contactMongo);
-        when(interractionBdContact.findByUtilisateurAndId(Mockito.any(Utilisateur.class),Mockito.any(Long.class))).thenReturn(contactEnBD);
+        when(interactionMongoContact.findBy_id(Mockito.any(Long.class))).thenReturn(contactMongo);
+        when(interactionBdContact.findByUtilisateurAndId(Mockito.any(Utilisateur.class),Mockito.any(Long.class))).thenReturn(contactEnBD);
 
         contactService.modifierContact(contactModifier,utilisateur,id);
         Contact result = contactEnBD.getFirst();

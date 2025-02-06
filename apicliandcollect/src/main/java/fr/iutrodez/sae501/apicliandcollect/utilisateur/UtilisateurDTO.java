@@ -63,11 +63,11 @@ public class UtilisateurDTO {
     @Component
     public static class EmailUniqueValidator implements ConstraintValidator<UniqueEmail, String> {
         @Autowired
-        private InterractionBdUtilisateur interractionBdUtilisateur;
+        private InteractionBdUtilisateur interactionBdUtilisateur;
 
         @Override
         public boolean isValid(String mail, ConstraintValidatorContext context) {
-            return mail != null && !interractionBdUtilisateur.existsByMail(mail);
+            return mail != null && !interactionBdUtilisateur.existsByMail(mail);
         }
     }
 }

@@ -1,6 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
-import fr.iutrodez.sae501.apicliandcollect.contact.InterractionMongoContact;
+import fr.iutrodez.sae501.apicliandcollect.contact.InteractionMongoContact;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service;
 public class UtilisateurService {
 
     @Autowired
-    private InterractionBdUtilisateur interractionBdUtilisateur;
+    private InteractionBdUtilisateur interactionBdUtilisateur;
 
     @Autowired
-    private InterractionMongoUtilisateur interractionMongoUtilisateur;
+    private InteractionMongoUtilisateur interactionMongoUtilisateur;
 
     @Autowired
     private PasswordEncoder encoderMotPasse;
     @Autowired
-    private InterractionMongoContact interractionMongoContact;
+    private InteractionMongoContact interactionMongoContact;
 
 
     /**
@@ -37,10 +37,10 @@ public class UtilisateurService {
         //TODO encoder mot de passe avant envoi
         utilisateur.setMotDePasse(encoderMotPasse.encode(utilisateurInscrit.getMotDePasse()));
         utilisateur.setAdresse(utilisateurInscrit.getAdresse());
-        Utilisateur resultat = interractionBdUtilisateur.save(utilisateur);
+        Utilisateur resultat = interactionBdUtilisateur.save(utilisateur);
         utilisateurMongo.set_id(resultat.getId());
         utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurInscrit.getLongitude(), utilisateurInscrit.getLatitude()));
-        UtilisateurMongo localisation = interractionMongoUtilisateur.save(utilisateurMongo);
+        UtilisateurMongo localisation = interactionMongoUtilisateur.save(utilisateurMongo);
         return utilisateurEnJson(utilisateur, localisation);
     }
 
@@ -51,7 +51,7 @@ public class UtilisateurService {
      */
     @Transactional
     public void supprimerUtilisateur(Utilisateur utilisateurASupprimer) {
-        interractionBdUtilisateur.delete(utilisateurASupprimer);
+        interactionBdUtilisateur.delete(utilisateurASupprimer);
     }
 
 
