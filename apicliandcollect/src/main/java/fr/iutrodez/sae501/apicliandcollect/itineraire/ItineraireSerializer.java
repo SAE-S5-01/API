@@ -34,7 +34,7 @@ public class ItineraireSerializer {
         // Récupérer les noms des contacts depuis un service (ou une base de données)
         ArrayList<Long> idsContacts = i.getListeIdContact();
         for (Long id : idsContacts) {
-            String nomContact = bd.findNameById(id);
+            String nomContact = bd.findByEntrepriseById(id);
             this.listeContact.put(id, nomContact);
         }
         this.lineStringCoordonnees = i.getLineStringCoordonnees();
