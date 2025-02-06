@@ -23,6 +23,7 @@ public class ItineraireDTO {
 
     @NotNull(message = "La liste des clients ordonnée est obligatoire")
     @ValidateMap
-    private LinkedHashMap<Long , Point> ordreClients;
+    @Size(max = 8, message = "L'itinéraire doit contenir au plus 8 clients")
+    private LinkedHashMap<Long , Point> listePoint;
 }
 

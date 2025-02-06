@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * Annotation pour vérifier que les clés d'une map représentant des <contacts , coordonnées>
  * sont bien présentes dans la table de contact.
  *
- * @author Descriaud Lucas
+ * @author Lucas DESCRIAUD
  */
 @Constraint(validatedBy = MapKeyValidator.class)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
