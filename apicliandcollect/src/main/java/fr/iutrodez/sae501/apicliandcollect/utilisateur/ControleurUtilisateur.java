@@ -34,20 +34,25 @@ public class ControleurUtilisateur {
     private UtilisateurService service;
 
     @Autowired
-    private InteractionBdUtilisateur interactionBdUtilisateur;
-
-    @Autowired
     private ServiceAuthentification serviceAuthentification;
 
     @Autowired
     private ServiceJwt serviceJwt;
 
-    @Autowired
-    private PasswordEncoder encoderMotPasse;
-
     private static final String SUCCES_CONNEXION = "Utilisateur connecté avec succès";
     private static final String SUCCES_SUPPRESSION = "Compte supprimé avec succès";
     private static final String SUCCES_MODIFICATION = "Utilisateur modifié avec succès";
+
+    /**
+     * Récupère les informations de l'utilisateur connecté.
+     * @param authentication les informations d'authentification de l'utilisateur
+     * @return une entité de réponse avec les informations de l'utilisateur connecté
+     */
+    @GetMapping
+    public ResponseEntity<UtilisateurDTO> getUtilisateur(Authentication authentication) {
+        Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
+        return ResponseEntity.ok(service.getUtilisateur(utilisateur));
+    }
 
     /**
      * Authentifie un utilisateur.
@@ -82,7 +87,6 @@ public class ControleurUtilisateur {
         reponse.put("token", token);
         return new ResponseEntity<>(reponse, HttpStatus.CREATED);
     }
-
 
     /**
      * Modifie les informations de l'utilisateur connecté

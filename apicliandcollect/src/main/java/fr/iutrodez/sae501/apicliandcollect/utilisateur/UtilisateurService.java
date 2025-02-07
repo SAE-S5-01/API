@@ -20,6 +20,18 @@ public class UtilisateurService {
     private PasswordEncoder encoderMotPasse;
 
     /**
+     * Récupère l'utilisateur connecté avec sa localisation
+     * @param u l'utilisateur connecté
+     * @return l'utilisateur connecté au format Json
+     */
+    public UtilisateurDTO getUtilisateur(Utilisateur u) {
+        long id = u.getId();
+        Utilisateur utilisateur = interactionBdUtilisateur.findById(id).orElseThrow();
+        UtilisateurMongo localisation = interactionMongoUtilisateur.findBy_id(id);
+        return utilisateurEnJson(utilisateur, localisation);
+    }
+
+    /**
      * Crée l'utilisateur en base de données
      * @param utilisateurInscrit : les données de l'utilisateur à inscrire
      * @return l'utilisateur inscrit au format Json
@@ -87,6 +99,4 @@ public class UtilisateurService {
         utilisateurDTO.setLongitude(localisation.getLocation().getX());
         return utilisateurDTO;
     }
-
-
 }
