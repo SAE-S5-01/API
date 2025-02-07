@@ -56,6 +56,13 @@ public class ControleurContact {
         return new ResponseEntity<>(contact, HttpStatus.CREATED);
     }
 
+    /**
+     * Modifie un contact de l'utilisateur connecté
+     * @param contactModifier Le contact à modifier
+     * @param id L'identifiant du contact à supprimer (passé dans l'URL)
+     * @param utilisateur L'utilisateur connecté
+     * @return Un message de succès
+     */
     @PutMapping("/contact")
     public ResponseEntity<ReponseTextuelle> modifierClient(@Valid @RequestBody ContactDTO contactModifier, @RequestParam String id, Authentication utilisateur) {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();

@@ -18,9 +18,6 @@ public class UtilisateurService {
 
     @Autowired
     private PasswordEncoder encoderMotPasse;
-    @Autowired
-    private InteractionMongoContact interactionMongoContact;
-
 
     /**
      * Crée l'utilisateur en base de données
@@ -44,16 +41,34 @@ public class UtilisateurService {
         return utilisateurEnJson(utilisateur, localisation);
     }
 
+    /**
+     * Modifie l'utilisateur stocké
+     * @param utilisateurModifie : les données de l'utilisateur à modifier
+     * @return l'utilisateur modifié au format Json
+     */
+    @Transactional
+    public void modifierUtilisateur(UtilisateurDTO utilisateurModifie, Utilisateur utilisateur) throws IllegalArgumentException {
+        utilisateur.setNom(utilisateurModifie.getNom());
+        utilisateur.setPrenom(utilisateurModifie.getPrenom());
+        utilisateur.setMail(utilisateurModifie.getMail());
+        utilisateur.setMotDePasse(encoderMotPasse.encode(utilisateurModifie.getMotDePasse()));
+        utilisateur.setAdresse(utilisateurModifie.getAdresse());
+        interactionBdUtilisateur.save(utilisateur);
+
+        UtilisateurMongo utilisateurMongo = interactionMongoUtilisateur.findBy_id(utilisateur.getId());
+        utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurModifie.getLongitude(), utilisateurModifie.getLatitude()));
+        interactionMongoUtilisateur.save(utilisateurMongo);
+    }
+
 
     /**
-     * Supprime un utilisateur de la base de données
+     * Supprime l'utilisateur connecté de la base de données
      * @param utilisateurASupprimer l'utilisateur à supprimer
      */
     @Transactional
     public void supprimerUtilisateur(Utilisateur utilisateurASupprimer) {
         interactionBdUtilisateur.delete(utilisateurASupprimer);
     }
-
 
     /**
      * Revoie les informations de l'utilisateur au format Json

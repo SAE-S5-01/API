@@ -39,7 +39,6 @@ public class    ControleurItineraire {
 
     @PostMapping("/itineraire/calculer")
     public ResponseEntity<String> verifierListe(@Valid @RequestBody ListeClientDTO listePoint) throws JsonProcessingException {
-
         LinkedHashMap<Long, Point> liste = listePoint.getListePoint();
         /*
          * Ajout du domicile en premier élément de la liste , id -1 car sera retiré plus tard.
