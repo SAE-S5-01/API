@@ -63,7 +63,6 @@ public class ControleurUtilisateur {
 
     /**
      * Inscrit un nouvel utilisateur.
-     *
      * @param utilisateurInscrit l'objet de transfert de données de l'utilisateur contenant les détails de l'utilisateur
      * @return une entité de réponse avec un message de création
      */
@@ -81,11 +80,17 @@ public class ControleurUtilisateur {
     }
 
 
+    /**
+     * Modifie les informations de l'utilisateur connecté
+     * @param utilisateurModifie les nouvelles informations de l'utilisateur
+     * @param authentication les informations d'authentification de l'utilisateur
+     * @return une entité de réponse avec un message de succès pour la modification
+     */
     @PutMapping
     public ResponseEntity<Map<String, ?>> modifierCompte(@Validated(GroupValidationDTO.ModificationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurModifie,
-                                                           Authentication utilisateur) {
+                                                           Authentication authentication) {
             Map<String, String> reponse = new HashMap<>();
-            Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+            Utilisateur u = (Utilisateur) authentication.getPrincipal();
 
 
             service.modifierUtilisateur(utilisateurModifie, u);
