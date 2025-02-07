@@ -9,6 +9,7 @@ import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceAuthentification;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceJwt;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +78,7 @@ public class ControleurUtilisateur {
      * @return une entité de réponse avec un message de création
      */
     @PostMapping("/inscription")
-    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurInscrit) {
+    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @Validated(GroupValidationDTO.CreationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurInscrit) {
         UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
         Map <String, String> reponse = new HashMap<>();
         reponse.put("mail", utilisateurDTO.getMail());
@@ -95,7 +96,7 @@ public class ControleurUtilisateur {
      * @return une entité de réponse avec un message de succès pour la modification
      */
     @PutMapping
-    public ResponseEntity<Map<String, ?>> modifierCompte(@Validated(GroupValidationDTO.ModificationUtilisateur.class)
+    public ResponseEntity<Map<String, ?>> modifierCompte(@Valid @Validated(GroupValidationDTO.ModificationUtilisateur.class)
                                                          @RequestBody UtilisateurDTO utilisateurModifie,
                                                          Authentication authentication) {
         Map<String, String> reponse = new HashMap<>();

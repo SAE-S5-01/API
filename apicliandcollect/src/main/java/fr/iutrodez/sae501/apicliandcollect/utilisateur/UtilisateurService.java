@@ -59,7 +59,7 @@ public class UtilisateurService {
      * @return l'utilisateur modifié au format Json
      */
     @Transactional
-    public void modifierUtilisateur(UtilisateurDTO utilisateurModifie, Utilisateur utilisateur) throws IllegalArgumentException {
+    public void modifierUtilisateur(UtilisateurDTO utilisateurModifie, Utilisateur utilisateur) {
         utilisateur.setNom(utilisateurModifie.getNom());
         utilisateur.setPrenom(utilisateurModifie.getPrenom());
         utilisateur.setMail(utilisateurModifie.getMail());
