@@ -58,7 +58,7 @@ public class UtilisateurDTO {
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
     @Retention(RetentionPolicy.RUNTIME)
     public @interface UniqueEmail {
-        String message() default "Mail déjà utilisé";
+        String message() default "Adresse mail déjà utilisé";
         Class<?>[] groups() default {};
         Class<? extends Payload>[] payload() default {};
     }
@@ -67,7 +67,7 @@ public class UtilisateurDTO {
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
     @Retention(RetentionPolicy.RUNTIME)
     public @interface ModificationEmail {
-        String message() default "Mail déjà utilisé";
+        String message() default "Adresse mail déjà utilisé";
         Class<?>[] groups() default {};
         Class<? extends Payload>[] payload() default {};
     }

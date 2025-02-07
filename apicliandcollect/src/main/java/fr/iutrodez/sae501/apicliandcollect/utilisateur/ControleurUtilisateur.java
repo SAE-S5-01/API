@@ -1,9 +1,14 @@
+/*
+ * ControleurUtilisateur.java                            07 fev. 2025
+ * IUT de Rodez, pas de copyright ni de "copyleft".
+ */
+
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
 import fr.iutrodez.sae501.apicliandcollect.ReponseTextuelle;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceAuthentification;
 import fr.iutrodez.sae501.apicliandcollect.securite.ServiceJwt;
-import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,13 +75,12 @@ public class ControleurUtilisateur {
     public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurInscrit) {
         UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
         Map <String, String> reponse = new HashMap<>();
-
-            reponse.put("mail", utilisateurDTO.getMail());
-            reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
-            Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
-            String token = serviceJwt.generateToken(utilisateur);
-            reponse.put("token", token);
-            return new ResponseEntity<>(reponse, HttpStatus.CREATED);
+        reponse.put("mail", utilisateurDTO.getMail());
+        reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
+        Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
+        String token = serviceJwt.generateToken(utilisateur);
+        reponse.put("token", token);
+        return new ResponseEntity<>(reponse, HttpStatus.CREATED);
     }
 
 
@@ -87,17 +91,16 @@ public class ControleurUtilisateur {
      * @return une entité de réponse avec un message de succès pour la modification
      */
     @PutMapping
-    public ResponseEntity<Map<String, ?>> modifierCompte(@Validated(GroupValidationDTO.ModificationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurModifie,
-                                                           Authentication authentication) {
-            Map<String, String> reponse = new HashMap<>();
-            Utilisateur u = (Utilisateur) authentication.getPrincipal();
-
-
-            service.modifierUtilisateur(utilisateurModifie, u);
-            reponse.put("message", SUCCES_MODIFICATION);
-            String token = serviceJwt.generateToken(u);
-            reponse.put("token", token);
-            return new ResponseEntity<>(reponse, HttpStatus.OK);
+    public ResponseEntity<Map<String, ?>> modifierCompte(@Validated(GroupValidationDTO.ModificationUtilisateur.class)
+                                                         @RequestBody UtilisateurDTO utilisateurModifie,
+                                                         Authentication authentication) {
+        Map<String, String> reponse = new HashMap<>();
+        Utilisateur u = (Utilisateur) authentication.getPrincipal();
+        service.modifierUtilisateur(utilisateurModifie, u);
+        reponse.put("message", SUCCES_MODIFICATION);
+        String token = serviceJwt.generateToken(u);
+        reponse.put("token", token);
+        return new ResponseEntity<>(reponse, HttpStatus.OK);
     }
 
     /**
