@@ -29,7 +29,7 @@ public class UtilisateurDTO {
     @NotBlank(message = "Votre email est obligatoire")
     @Email(message = "Adresse email non valide : ex. johndoe@gmail.com")
     @Size(max = 200, message = "Votre email ne peut pas contenir plus de 200 caractères")
-    @UniqueEmail
+    @UniqueEmail(groups = GroupValidationDTO.CreationUtilisateur.class)
     private String mail;
 
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W.-])[A-Za-z\\d\\W.-]{8,50}$",

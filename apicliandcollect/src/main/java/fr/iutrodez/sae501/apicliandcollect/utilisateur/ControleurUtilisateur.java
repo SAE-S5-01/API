@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -49,7 +50,8 @@ public class ControleurUtilisateur {
      * @return une entité de réponse avec un message de création
      */
     @PostMapping("/inscription")
-    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Valid @RequestBody UtilisateurDTO utilisateurInscrit) {
+    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class)
+                                                                       @RequestBody UtilisateurDTO utilisateurInscrit) {
         UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
         Map <String, String> reponse = new HashMap<>();
         reponse.put("mail", utilisateurDTO.getMail());
