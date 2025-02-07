@@ -71,36 +71,28 @@ public class ControleurUtilisateur {
     public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurInscrit) {
         UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
         Map <String, String> reponse = new HashMap<>();
-        try {
+
             reponse.put("mail", utilisateurDTO.getMail());
             reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
             Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
             String token = serviceJwt.generateToken(utilisateur);
             reponse.put("token", token);
             return new ResponseEntity<>(reponse, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            reponse.put("mail", utilisateurDTO.getMail());
-            reponse.put("message", e.getMessage());
-            return new ResponseEntity<>(reponse, HttpStatus.CONFLICT);
-        }
     }
 
 
     @PutMapping
-    public ResponseEntity<Map<String, ?>> modifierCompte(@Valid @RequestBody UtilisateurDTO utilisateurModifie,
+    public ResponseEntity<Map<String, ?>> modifierCompte(@Validated(GroupValidationDTO.ModificationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurModifie,
                                                            Authentication utilisateur) {
-        try {
             Map<String, String> reponse = new HashMap<>();
             Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+
+
             service.modifierUtilisateur(utilisateurModifie, u);
             reponse.put("message", SUCCES_MODIFICATION);
             String token = serviceJwt.generateToken(u);
             reponse.put("token", token);
             return new ResponseEntity<>(reponse, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            Map<String, Map<String, String>> reponse = Map.of("erreur", Map.of("mail", e.getMessage()));
-            return new ResponseEntity<>(reponse, HttpStatus.CONFLICT);
-        }
     }
 
     /**

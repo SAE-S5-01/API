@@ -54,7 +54,7 @@ public class UtilisateurService {
     @Transactional
     public void modifierUtilisateur(UtilisateurDTO utilisateurModifie, Utilisateur utilisateur) throws IllegalArgumentException {
 
-        if (!interactionBdUtilisateur.existsByMail(utilisateurModifie.getMail()) || utilisateur.getMail().equals(utilisateurModifie.getMail())) {
+
             utilisateur.setPrenom(utilisateurModifie.getPrenom());
             utilisateur.setMail(utilisateurModifie.getMail());
             utilisateur.setMotDePasse(encoderMotPasse.encode(utilisateurModifie.getMotDePasse()));
@@ -65,9 +65,8 @@ public class UtilisateurService {
             UtilisateurMongo utilisateurMongo = interactionMongoUtilisateur.findBy_id(utilisateur.getId());
             utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurModifie.getLongitude(), utilisateurModifie.getLatitude()));
             interactionMongoUtilisateur.save(utilisateurMongo);
-        } else {
-            throw new IllegalArgumentException(MAIL_EXISTANT);
-        }
+
+
     }
 
 
