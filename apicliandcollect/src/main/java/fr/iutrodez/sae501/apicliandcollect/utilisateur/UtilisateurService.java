@@ -21,6 +21,8 @@ public class UtilisateurService {
     @Autowired
     private InteractionMongoContact interactionMongoContact;
 
+    private static final String MAIL_EXISTANT = "Mail déjà utilisé";
+
 
     /**
      * Crée l'utilisateur en base de données
@@ -42,6 +44,30 @@ public class UtilisateurService {
         utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurInscrit.getLongitude(), utilisateurInscrit.getLatitude()));
         UtilisateurMongo localisation = interactionMongoUtilisateur.save(utilisateurMongo);
         return utilisateurEnJson(utilisateur, localisation);
+    }
+
+    /**
+     * Modifie l'utilisateur en base de données
+     * @param utilisateurModifie : les données de l'utilisateur à modifier
+     * @return l'utilisateur modifié au format Json
+     */
+    @Transactional
+    public void modifierUtilisateur(UtilisateurDTO utilisateurModifie, Utilisateur utilisateur) throws IllegalArgumentException {
+
+        if (!interactionBdUtilisateur.existsByMail(utilisateurModifie.getMail()) || utilisateur.getMail().equals(utilisateurModifie.getMail())) {
+            utilisateur.setPrenom(utilisateurModifie.getPrenom());
+            utilisateur.setMail(utilisateurModifie.getMail());
+            utilisateur.setMotDePasse(encoderMotPasse.encode(utilisateurModifie.getMotDePasse()));
+            utilisateur.setAdresse(utilisateurModifie.getAdresse());
+
+            interactionBdUtilisateur.save(utilisateur);
+
+            UtilisateurMongo utilisateurMongo = interactionMongoUtilisateur.findBy_id(utilisateur.getId());
+            utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurModifie.getLongitude(), utilisateurModifie.getLatitude()));
+            interactionMongoUtilisateur.save(utilisateurMongo);
+        } else {
+            throw new IllegalArgumentException(MAIL_EXISTANT);
+        }
     }
 
 

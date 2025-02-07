@@ -42,25 +42,7 @@ public class ControleurUtilisateur {
 
     private static final String SUCCES_CONNEXION = "Utilisateur connecté avec succès";
     private static final String SUCCES_SUPPRESSION = "Compte supprimé avec succès";
-    
-    /**
-     * Inscrit un nouvel utilisateur.
-     *
-     * @param utilisateurInscrit l'objet de transfert de données de l'utilisateur contenant les détails de l'utilisateur
-     * @return une entité de réponse avec un message de création
-     */
-    @PostMapping("/inscription")
-    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class)
-                                                                       @RequestBody UtilisateurDTO utilisateurInscrit) {
-        UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
-        Map <String, String> reponse = new HashMap<>();
-        reponse.put("mail", utilisateurDTO.getMail());
-        reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
-        Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
-        String token = serviceJwt.generateToken(utilisateur);
-        reponse.put("token", token);
-        return new ResponseEntity<>(reponse, HttpStatus.CREATED);
-    }
+    private static final String SUCCES_MODIFICATION = "Utilisateur modifié avec succès";
 
     /**
      * Authentifie un utilisateur.
@@ -80,14 +62,57 @@ public class ControleurUtilisateur {
     }
 
     /**
+     * Inscrit un nouvel utilisateur.
+     *
+     * @param utilisateurInscrit l'objet de transfert de données de l'utilisateur contenant les détails de l'utilisateur
+     * @return une entité de réponse avec un message de création
+     */
+    @PostMapping("/inscription")
+    public ResponseEntity<Map<String, String>> inscrireUtilisateur(@Validated(GroupValidationDTO.CreationUtilisateur.class) @RequestBody UtilisateurDTO utilisateurInscrit) {
+        UtilisateurDTO utilisateurDTO = service.creerUtilisateur(utilisateurInscrit);
+        Map <String, String> reponse = new HashMap<>();
+        try {
+            reponse.put("mail", utilisateurDTO.getMail());
+            reponse.put("motDePasse", utilisateurDTO.getMotDePasse());
+            Utilisateur utilisateur = serviceAuthentification.authenticate(utilisateurInscrit.getMail(), utilisateurInscrit.getMotDePasse());
+            String token = serviceJwt.generateToken(utilisateur);
+            reponse.put("token", token);
+            return new ResponseEntity<>(reponse, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            reponse.put("mail", utilisateurDTO.getMail());
+            reponse.put("message", e.getMessage());
+            return new ResponseEntity<>(reponse, HttpStatus.CONFLICT);
+        }
+    }
+
+
+    @PutMapping
+    public ResponseEntity<Map<String, ?>> modifierCompte(@Valid @RequestBody UtilisateurDTO utilisateurModifie,
+                                                           Authentication utilisateur) {
+        try {
+            Map<String, String> reponse = new HashMap<>();
+            Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+            service.modifierUtilisateur(utilisateurModifie, u);
+            reponse.put("message", SUCCES_MODIFICATION);
+            String token = serviceJwt.generateToken(u);
+            reponse.put("token", token);
+            return new ResponseEntity<>(reponse, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            Map<String, Map<String, String>> reponse = Map.of("erreur", Map.of("mail", e.getMessage()));
+            return new ResponseEntity<>(reponse, HttpStatus.CONFLICT);
+        }
+    }
+
+    /**
      * Supprime un utilisateur
      * @param authentication : les informations d'authentification de l'utilisateur
      * @return un message de succès et un code de statut 200 (OK)
      */
-    @PutMapping("/suppresionCompte")
+    @DeleteMapping
     public ResponseEntity<ReponseTextuelle> supprimerCompte(Authentication authentication) {
         Utilisateur utilisateur = (Utilisateur) authentication.getPrincipal();
         service.supprimerUtilisateur(utilisateur);
         return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION) ,HttpStatus.OK);
     }
+
 }
