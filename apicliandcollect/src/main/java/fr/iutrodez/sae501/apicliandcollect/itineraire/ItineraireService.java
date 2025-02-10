@@ -34,7 +34,8 @@ public class ItineraireService {
     public String calculerItineraire(
             LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
         LinkedHashMap<String , Point> listeClientsFormatte = new LinkedHashMap<>();
-        return formattageItineraire(listeClients);
+        LinkedHashMap<Long,Point> listeClientOrdonnes = UtilitaireItineraire.CalculeItineraireGlouton(listeClients);
+        return formattageItineraire(listeClientOrdonnes);
     }
 
     /**
