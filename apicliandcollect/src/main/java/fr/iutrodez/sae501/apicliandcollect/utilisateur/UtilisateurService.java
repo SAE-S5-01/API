@@ -43,7 +43,6 @@ public class UtilisateurService {
         utilisateur.setNom(utilisateurInscrit.getNom());
         utilisateur.setPrenom(utilisateurInscrit.getPrenom());
         utilisateur.setMail(utilisateurInscrit.getMail());
-        //TODO encoder mot de passe avant envoi
         utilisateur.setMotDePasse(encoderMotPasse.encode(utilisateurInscrit.getMotDePasse()));
         utilisateur.setAdresse(utilisateurInscrit.getAdresse());
         Utilisateur resultat = interactionBdUtilisateur.save(utilisateur);
