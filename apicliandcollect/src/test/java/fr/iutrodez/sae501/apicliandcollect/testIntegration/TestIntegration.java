@@ -61,7 +61,7 @@ class TestIntegration {
     void inscriptionTest() throws Exception{
         String utilisateur = """
                 {
-                    "mail": "testtest@gmail.com",
+                    "mail": "testetestetest@gmail.com",
                     "motDePasse": "Test1234@",
                     "nom": "test",
                     "prenom": "test",
@@ -177,6 +177,8 @@ class TestIntegration {
                 .andExpect(status().is5xxServerError());
     }
 
+
+
     @Test
     @Order(3)
     void connexionShouldFail() throws Exception {
@@ -190,27 +192,10 @@ class TestIntegration {
     @Order(4)
     void connexionTest() throws Exception {
         mockMvc.perform(get(BASE_API_UTILISATEUR +"connexion")
-                        .param("mail", "testtest@gmail.com")
+                        .param("mail", "testetestetest@gmail.com")
                         .param("motDePasse","Test1234@"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("Utilisateur connecté avec succès"));
-    }
-
-    @Test
-    @Order(5)
-    void SupprimerUtilisateurTest() throws Exception{
-        MvcResult result = mockMvc.perform(get(BASE_API_UTILISATEUR +"connexion")
-                        .param("mail", "testtest@gmail.com")
-                        .param("motDePasse","Test1234@"))
-                .andExpect(status().isOk()).andReturn();
-
-        String reponse = result.getResponse().getContentAsString();
-        ObjectMapper objectMapper = new ObjectMapper();
-        con = objectMapper.readValue(reponse, new TypeReference<>() {});
-
-        mockMvc.perform(put("/api/utilisateur/suppresionCompte")
-                        .header("Authorization","Bearer " + con.get("token")))
-                .andExpect(status().isOk());
     }
 
     /**
@@ -220,24 +205,9 @@ class TestIntegration {
      */
     @BeforeEach
     void setUp() throws Exception {
-        String utilisateur = """
-                {
-                    "mail": "testInte@gmail.com",
-                    "motDePasse": "Test1234@",
-                    "nom": "test",
-                    "prenom": "test",
-                    "adresse": "adresse test",
-                    "latitude": 2.987654,
-                    "longitude": 44.321654
-                }
-                """;
-
-        mockMvc.perform(post(BASE_API_UTILISATEUR + "inscription")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(utilisateur));
 
         MvcResult result = mockMvc.perform(get("/api/utilisateur/connexion")
-                        .param("mail","testInte@gmail.com")
+                        .param("mail","testetestetest@gmail.com")
                         .param("motDePasse","Test1234@"))
                 .andReturn();
 
@@ -247,21 +217,21 @@ class TestIntegration {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void nouveauContact() throws Exception {
         String client =  """
-                                {
-                                    "nomEntreprise": "entreprise",
-                                    "adresse": "Rue Carnus, L'Usine à Gaz, Camonil, Rodez, Aveyron, Occitanie, France métropolitaine, 12000, France",
-                                    "nomContact": "nom",
-                                    "prenomContact": "prenom",
-                                    "telephone": "+33612345678",
-                                    "description": "Blabla",
-                                    "prospect": true,
-                                    "longitude": 44.145678,
-                                    "latitude": 2.123456
-                                }
-                                """;
+                        {
+                            "nomEntreprise": "entreprise",
+                            "adresse": "Rue Carnus, L'Usine à Gaz, Camonil, Rodez, Aveyron, Occitanie, France métropolitaine, 12000, France",
+                            "nomContact": "nom",
+                            "prenomContact": "prenom",
+                            "telephone": "+33612345678",
+                            "description": "Blabla",
+                            "prospect": true,
+                            "longitude": 44.145678,
+                            "latitude": 2.123456
+                        }
+                        """;
         mockMvc.perform(post(ROUTE_API).header("Authorization","Bearer " + con.get("token"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(client))
@@ -269,7 +239,7 @@ class TestIntegration {
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     void obtenirContact() throws Exception {
     mockMvc.perform(get(ROUTE_API)
                         .header("Authorization","Bearer " + con.get("token")))
@@ -287,14 +257,14 @@ class TestIntegration {
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     void obtenirContactSansConnexion() throws Exception {
         mockMvc.perform(get(ROUTE_API))
                 .andExpect(status().is4xxClientError());
     }
 
     @Test
-    @Order(9)
+    @Order(8)
     void modifierContact() throws Exception {
         creationClientAModifier();
         String clientApresModif = """
@@ -304,7 +274,7 @@ class TestIntegration {
                     "nomContact": "nom contact",
                     "prenomContact": "prenom contact",
                     "telephone": "+33612345678",
-                    "description": "Client aprés modification",
+                    "description": "Client après modification",
                     "prospect": true,
                     "longitude": 44.145678,
                     "latitude": 2.123456
@@ -322,11 +292,11 @@ class TestIntegration {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("[1].nomEntreprise").value("entreprise modifier"))
-                .andExpect(jsonPath("[1].description").value("Client aprés modification"));
+                .andExpect(jsonPath("[1].description").value("Client après modification"));
     }
 
     @Test
-    @Order(10)
+    @Order(9)
     void CreationContactSansNomEntrepriseShouldFail() throws Exception {
         String client =  """
                                 {
@@ -347,7 +317,7 @@ class TestIntegration {
     }
 
     @Test
-    @Order(11)
+    @Order(10)
     void CreationContactSansAdresseShouldFail() throws Exception {
         String client =  """
                                 {
@@ -368,7 +338,7 @@ class TestIntegration {
     }
 
     @Test
-    @Order(12)
+    @Order(11)
     void modifierContactSansNomEntrepriseShouldFail() throws Exception {
         creationClientAModifier();
         String clientApresModif = """
@@ -377,7 +347,7 @@ class TestIntegration {
                     "nomContact": "nom contact",
                     "prenomContact": "prenom contact",
                     "telephone": "+33612345678",
-                    "description": "Client aprés modification",
+                    "description": "Client après modification",
                     "prospect": true,
                     "longitude": 44.145678,
                     "latitude": 2.123456
@@ -392,7 +362,7 @@ class TestIntegration {
     }
 
     @Test
-    @Order(13)
+    @Order(12)
     void modifierContactSansAdresseShouldFail() throws Exception {
         creationClientAModifier();
         String clientApresModif = """
@@ -401,7 +371,7 @@ class TestIntegration {
                     "nomContact": "nom contact",
                     "prenomContact": "prenom contact",
                     "telephone": "+33612345678",
-                    "description": "Client aprés modification",
+                    "description": "Client après modification",
                     "prospect": true,
                     "longitude": 44.145678,
                     "latitude": 2.123456
@@ -416,9 +386,18 @@ class TestIntegration {
     }
 
     @Test
-    @Order(14)
-    void clean() throws Exception{
-        mockMvc.perform(put("/api/utilisateur/suppresionCompte")
+    @Order(13)
+    void SupprimerUtilisateurTest() throws Exception{
+        MvcResult result = mockMvc.perform(get(BASE_API_UTILISATEUR +"connexion")
+                        .param("mail", "testetestetest@gmail.com")
+                        .param("motDePasse","Test1234@"))
+                .andExpect(status().isOk()).andReturn();
+
+        String reponse = result.getResponse().getContentAsString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        con = objectMapper.readValue(reponse, new TypeReference<>() {});
+
+        mockMvc.perform(delete("/api/utilisateur")
                         .header("Authorization","Bearer " + con.get("token")))
                 .andExpect(status().isOk());
     }
