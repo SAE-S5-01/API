@@ -66,9 +66,12 @@ public class ControleurUtilisateur {
     public ResponseEntity<Map<String, String>> connexionUtilisateur(@RequestParam String mail, @RequestParam String motDePasse) {
         Utilisateur utilisateurAauthentifier =  serviceAuthentification.authenticate(mail, motDePasse);
         String token = serviceJwt.generateToken(utilisateurAauthentifier);
+        UtilisateurDTO utilisateurDonnees = service.getUtilisateur(utilisateurAauthentifier);
         Map <String, String> reponse = new HashMap<>();
         reponse.put("message", SUCCES_CONNEXION);
         reponse.put("token", token);
+        reponse.put("y", String.valueOf(utilisateurDonnees.getLatitude()));
+        reponse.put("x", String.valueOf(utilisateurDonnees.getLongitude()));
         return ResponseEntity.ok(reponse);
     }
 
