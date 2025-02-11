@@ -14,4 +14,6 @@ public interface InteractionMongoItineraire extends MongoRepository<Itineraire, 
     ArrayList<Itineraire> findByIdCreateur(Long idCreateur);
 
     Itineraire findBy_idAndIdCreateur(String id, Long idCreateur);
+
+    void deleteByIdCreateur(long idCreateur);
 }

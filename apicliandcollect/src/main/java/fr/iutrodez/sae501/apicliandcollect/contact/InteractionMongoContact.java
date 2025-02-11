@@ -9,4 +9,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface InteractionMongoContact extends MongoRepository<ContactMongo, String> {
     ContactMongo findBy_id(Long id);
+
+    void deleteBy_id(Long id);
 }

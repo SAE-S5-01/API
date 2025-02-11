@@ -21,4 +21,6 @@ public interface InteractionBdContact extends JpaRepository<Contact, Long> {
 
     @Query("SELECT c.entreprise FROM Contact c WHERE c.id = :id")
     String findEntrepriseById(@Param("id") Long id);
+
+    void deleteByUtilisateur(Utilisateur u);
 }
