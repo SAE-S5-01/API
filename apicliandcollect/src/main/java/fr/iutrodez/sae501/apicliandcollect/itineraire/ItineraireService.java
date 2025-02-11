@@ -70,6 +70,37 @@ public class ItineraireService {
         return formattageItineraire(insertion);
     }
 
+    /**
+     * Modifie un itinéraire
+     * @param idCreateur ID de l'utilisateur modifiant l'itinéraire
+     * @param id ID de l'itinéraire à modifier
+     * @param itineraire Objet contenant les informations de l'itinéraire
+     * @return L'itinéraire modifié
+     * @throws JsonProcessingException Erreur de formatage JSON
+     */
+    public String modifierItineraire(long idCreateur, String id, ListeClientDTO itineraire) throws JsonProcessingException {
+        Itineraire itineraireAModifier = interactionMongoItineraire.findBy_idAndIdCreateur(id, idCreateur);
+        if (itineraireAModifier == null) {
+            throw new IllegalArgumentException("L'itinéraire n'existe pas");
+        }
+
+        Collection<Point> listeCoordonne = itineraire.getListePoint().values();
+        String nomItineraire = itineraire.getNomItineraire();
+
+        if (nomItineraire != null) {
+            itineraireAModifier.setNomItineraire(nomItineraire);
+        }
+
+        ArrayList<Long> listeContact = new ArrayList<>(itineraire.getListePoint().keySet());
+        itineraireAModifier.setListeIdContact(listeContact);
+
+        GeoJsonLineString geoJsonLineString = new GeoJsonLineString(new ArrayList<>(listeCoordonne));
+        itineraireAModifier.setLineStringCoordonnees(geoJsonLineString);
+
+        interactionMongoItineraire.save(itineraireAModifier);
+        return formattageItineraire(itineraireAModifier);
+    }
+
     /** 
      * Supprime le contact d'id id
      * @param id l'id du contact à supprimer

@@ -57,6 +57,15 @@ public class    ControleurItineraire {
         String itineraireCree = itineraireService.creerItineraire(idCreateur, itineraire);
         return new ResponseEntity<>(itineraireCree, HttpStatus.OK);
     }
+
+    @PutMapping("/itineraire/{id}")
+    public ResponseEntity<String> modifierItineraire(Authentication utilisateur, @PathVariable String id, @Valid @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        Long idCreateur = u.getId();
+
+        String itineraireModifie = itineraireService.modifierItineraire(idCreateur, id, itineraire);
+        return new ResponseEntity<>(itineraireModifie, HttpStatus.OK);
+    }
     
     /**
      * Supprime un itinéraire de l'utilisateur connecté.
