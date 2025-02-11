@@ -5,6 +5,7 @@
 
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
+import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class ContactService {
 
     @Autowired
     private InteractionMongoContact interactionMongoContact;
+
+    @Autowired
+    private InteractionMongoItineraire interactionMongoItineraire;
 
     /**
      * Crée un nouveau contact pour l'utilisateur u
@@ -72,7 +76,7 @@ public class ContactService {
         Contact contact = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
         interactionBdContact.delete(contact);
         interactionMongoContact.delete(interactionMongoContact.findBy_id(id));
-        // TODO : vérifier si besoin suppression autre...
+        interactionMongoItineraire.deleteByIdContact(id);
     }
 
     /**
