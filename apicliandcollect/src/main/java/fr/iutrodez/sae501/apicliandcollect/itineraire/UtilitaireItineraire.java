@@ -18,15 +18,18 @@ public class UtilitaireItineraire {
     public static LinkedHashMap<Long, Point> CalculeItineraireGlouton(LinkedHashMap<Long, Point> listeClient){
 
         double min;
-        Long id=-1L;
+        int nbClient = listeClient.size()-1;
+        Long id;
         Point domicile = listeClient.get(-1L);
         Point localisation = listeClient.get(-1L);
         listeClient.remove(-1L);
         min = distanceEntrePoint(localisation,listeClient.firstEntry().getValue());
         LinkedHashMap<Long,Point> clientOrdonnees = new LinkedHashMap<>();
-        Set<Long> ids = listeClient.keySet();
 
-        while(clientOrdonnees.size() < listeClient.size()){
+
+        while(clientOrdonnees.size() < nbClient){
+            Set<Long> ids = listeClient.keySet();
+            id = listeClient.firstEntry().getKey();
                 for (Long i : ids) {
                     if (!clientOrdonnees.containsKey(i)) {
                         double distance1 = distanceEntrePoint(localisation, listeClient.get(i));
@@ -40,7 +43,10 @@ public class UtilitaireItineraire {
             if(!clientOrdonnees.containsValue(listeClient.get(id))){
                 clientOrdonnees.put(id,listeClient.get(id));
                 localisation = listeClient.get(id);
-                min = 100L;
+                listeClient.remove(id);
+                if(listeClient.size()>= 1){
+                    min = distanceEntrePoint(localisation, listeClient.sequencedValues().getFirst());
+                }
             }
         }
         clientOrdonnees.putFirst(-1L, domicile);
