@@ -1,5 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
+import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,9 @@ class ContactServiceTest {
 
     @Mock
     private InteractionMongoContact interactionMongoContact;
+
+    @Mock
+    private InteractionMongoItineraire interactionMongoItineraire;
 
     @Mock
     private Contact contact;
@@ -76,13 +80,8 @@ class ContactServiceTest {
         contactSQL.setUtilisateur(utilisateur);
 
         id = 1L;
-        //utilisateur.setId(1L);
 
         MockitoAnnotations.initMocks(this);
-    }
-
-    private long simulationSauvegarde() {
-        return id;
     }
 
     @Test
@@ -124,7 +123,7 @@ class ContactServiceTest {
     }
 
     @Test
-    void modifierContact(){
+    void modifierContact() {
         ContactDTO contactModifier = new ContactDTO();
         contactModifier.setNomEntreprise("Nom entreprise de Test");
         contactModifier.setAdresse("Adresse de test");
@@ -155,6 +154,20 @@ class ContactServiceTest {
         assertEquals(contactModifier.getDescription(), result.getDescription());
         assertEquals(contactModifier.getLongitude(),contactMongo.getLocation().getX());
         assertEquals(contactModifier.getLatitude(), contactMongo.getLocation().getY());
+    }
+
+    @Test
+    void supprimerContact() {
+
+        doNothing().when(interactionBdContact).delete(Mockito.any(Contact.class));
+        doNothing().when(interactionMongoContact).deleteBy_id(Mockito.any(Long.class));
+
+        doNothing().when(interactionMongoItineraire).deleteByIdCreateur(Mockito.any(Long.class));
+
+        contactService.supprimerContact(utilisateur,id);
+
+        verify(interactionBdContact, times(1)).save(Mockito.any(Contact.class));
+        verify(interactionMongoContact, times(1)).save(Mockito.any(ContactMongo.class));
     }
 
 }

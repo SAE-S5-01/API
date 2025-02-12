@@ -83,6 +83,12 @@ public class ContactService {
         return contactEnJson(resultat , localisation);
     }
 
+    /**
+     * Modifie un contact donné
+     * @param contactModifier les nouvelles informations de contact
+     * @param u l'utilisateur connecté
+     * @param id l'id du contact à modifier
+     */
     public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
         Contact contacAmodifier = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
         contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
@@ -100,12 +106,13 @@ public class ContactService {
 
     /**
      * Supprime le contact d'id id
+     * @param u l'utilisateur connecté
      * @param id l'id du contact à supprimer
      */
     public void supprimerContact(Utilisateur u, Long id) {
         Contact contact = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
         interactionBdContact.delete(contact);
-        interactionMongoContact.delete(interactionMongoContact.findBy_id(id));
+        interactionMongoContact.deleteBy_id(id);
         interactionMongoItineraire.deleteByIdContact(id);
     }
 

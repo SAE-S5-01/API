@@ -106,8 +106,8 @@ public class UtilisateurService {
     @Transactional
     public void supprimerUtilisateur(Utilisateur utilisateurASupprimer) {
         List<Long> idContacts
-        = interactionBdContact.findByUtilisateur(utilisateurASupprimer).stream()
-                              .map(Contact::getId).toList();
+            = interactionBdContact.findByUtilisateur(utilisateurASupprimer).stream()
+                                  .map(Contact::getId).toList();
 
         interactionBdUtilisateur.delete(utilisateurASupprimer);
         interactionBdContact.deleteByUtilisateur(utilisateurASupprimer);
