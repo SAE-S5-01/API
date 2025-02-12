@@ -6,17 +6,32 @@
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
 import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionMongoUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
+import org.springframework.data.mongodb.core.index.GeospatialIndex;
 import org.springframework.stereotype.Service;
+import org.springframework.data.geo.Metrics;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ContactService {
+
+    private final static Distance DISTANCE_PROSPECT_PROCHE
+    = new Distance(1.0, Metrics.KILOMETERS);
+
+    private final static Distance DISTANCE_CLIENT_PROCHE
+    = new Distance(0.2, Metrics.KILOMETERS);
 
     @Autowired
     private InteractionBdContact interactionBdContact;
@@ -26,6 +41,21 @@ public class ContactService {
 
     @Autowired
     private InteractionMongoItineraire interactionMongoItineraire;
+
+    @Autowired
+    private InteractionMongoUtilisateur interactionMongoUtilisateur;
+
+    @Autowired
+    MongoTemplate mongoTemplate;
+
+    /**
+     * Crée un index géospatial sur la collection contact
+     * @apiNote Supprimer les données de la collection contact en cas de conflit de format de données
+     */
+    @PostConstruct
+    public void setupIndex() {
+        mongoTemplate.indexOps("contact").ensureIndex(new GeospatialIndex("location").typed(GeoSpatialIndexType.GEO_2DSPHERE));
+    }
 
     /**
      * Crée un nouveau contact pour l'utilisateur u
@@ -93,6 +123,38 @@ public class ContactService {
                 .findFirst().get();
             return contactEnJson(contact, localisation);
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère la liste des prospects à moins de 1000m de l'utilisateur.
+     * @param u L'utilisateur connecté
+     * @return La liste des prospects proches
+     */
+    public List<ContactDTO> getProspectsProches(Utilisateur u) {
+        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+
+        List<ContactMongo> prospectsProches
+        = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
+
+        return prospectsProches.stream().map(prospect -> {
+            Contact contact = interactionBdContact.findById(prospect.get_id()).get();
+            return contactEnJson(contact, prospect);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Vérifie si le client est proche de l'utilisateur
+     * @param u L'utilisateur connecté
+     * @param idClient L'id du client
+     * @return true si le client est proche, false sinon
+     */
+    public boolean isClientProche(Utilisateur u, long idClient) {
+        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+
+        List<ContactMongo> clientsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_CLIENT_PROCHE);
+
+        return clientsProches.stream()
+            .anyMatch(client -> client.get_id() == idClient);
     }
 
     /**
