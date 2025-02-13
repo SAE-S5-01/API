@@ -6,16 +6,19 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class ItineraireService {
