@@ -38,7 +38,7 @@ public class    ControleurItineraire {
     }
 
     @PostMapping("/itineraire/calculer")
-    public ResponseEntity<String> verifierListe(@Valid @RequestBody ListeClientDTO listePoint) throws JsonProcessingException {
+    public ResponseEntity<String> verifierListe(@Valid @RequestBody ItineraireDTO listePoint) throws JsonProcessingException {
         LinkedHashMap<Long, Point> liste = listePoint.getListePoint();
         /*
          * Ajout du domicile en premier élément de la liste , id -1 car sera retiré plus tard.
@@ -50,7 +50,7 @@ public class    ControleurItineraire {
     }
 
     @PostMapping("/itineraire")
-    public ResponseEntity<String> creerItineraire(Authentication utilisateur, @Valid @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
+    public ResponseEntity<String> creerItineraire(Authentication utilisateur, @Valid @RequestBody ItineraireDTO itineraire) throws JsonProcessingException {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long idCreateur = u.getId();
 
@@ -59,7 +59,7 @@ public class    ControleurItineraire {
     }
 
     @PutMapping("/itineraire/{id}")
-    public ResponseEntity<String> modifierItineraire(Authentication utilisateur, @PathVariable String id, @Valid @RequestBody ListeClientDTO itineraire) throws JsonProcessingException {
+    public ResponseEntity<String> modifierItineraire(Authentication utilisateur, @PathVariable String id, @Valid @RequestBody ItineraireDTO itineraire) throws JsonProcessingException {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long idCreateur = u.getId();
 
