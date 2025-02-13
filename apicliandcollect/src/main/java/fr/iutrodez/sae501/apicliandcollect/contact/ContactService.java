@@ -8,18 +8,16 @@ package fr.iutrodez.sae501.apicliandcollect.contact;
 import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionMongoUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeospatialIndex;
 import org.springframework.stereotype.Service;
-import org.springframework.data.geo.Metrics;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,18 +42,6 @@ public class ContactService {
 
     @Autowired
     private InteractionMongoUtilisateur interactionMongoUtilisateur;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    /**
-     * Crée un index géospatial sur la collection contact
-     * @apiNote Supprimer les données de la collection contact en cas de conflit de format de données
-     */
-    @PostConstruct
-    public void setupIndex() {
-        mongoTemplate.indexOps("contact").ensureIndex(new GeospatialIndex("location").typed(GeoSpatialIndexType.GEO_2DSPHERE));
-    }
 
     /**
      * Crée un nouveau contact pour l'utilisateur u
@@ -167,9 +153,9 @@ public class ContactService {
     /**
      * Convertit un contact en JSON
      *
-     * @param contact      le contact à convertir
-     * @param localisation
-     * @return le contact converti en JSON
+     * @param contact Le contact à convertir
+     * @param localisation La localisation du contact
+     * @return Le contact converti en JSON
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
