@@ -6,16 +6,19 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class ItineraireService {
@@ -44,7 +47,7 @@ public class ItineraireService {
      * @return L'itinéraire créé
      * @throws JsonProcessingException Erreur de formatage JSON
      */
-    public String creerItineraire(long idCreateur , ListeClientDTO itineraire) throws JsonProcessingException {
+    public String creerItineraire(long idCreateur , ItineraireDTO itineraire) throws JsonProcessingException {
 
         Collection<Point> listeCoordonne = itineraire.getListePoint().values();
         String nomItineraire = itineraire.getNomItineraire();
@@ -68,6 +71,37 @@ public class ItineraireService {
 
         interactionMongoItineraire.save(insertion);
         return formattageItineraire(insertion);
+    }
+
+    /**
+     * Modifie un itinéraire
+     * @param idCreateur ID de l'utilisateur modifiant l'itinéraire
+     * @param id ID de l'itinéraire à modifier
+     * @param itineraire Objet contenant les informations de l'itinéraire
+     * @return L'itinéraire modifié
+     * @throws JsonProcessingException Erreur de formatage JSON
+     */
+    public String modifierItineraire(long idCreateur, String id, ItineraireDTO itineraire) throws JsonProcessingException {
+        Itineraire itineraireAModifier = interactionMongoItineraire.findBy_idAndIdCreateur(id, idCreateur);
+        if (itineraireAModifier == null) {
+            throw new IllegalArgumentException("L'itinéraire n'existe pas");
+        }
+
+        Collection<Point> listeCoordonne = itineraire.getListePoint().values();
+        String nomItineraire = itineraire.getNomItineraire();
+
+        if (nomItineraire != null) {
+            itineraireAModifier.setNomItineraire(nomItineraire);
+        }
+
+        ArrayList<Long> listeContact = new ArrayList<>(itineraire.getListePoint().keySet());
+        itineraireAModifier.setListeIdContact(listeContact);
+
+        GeoJsonLineString geoJsonLineString = new GeoJsonLineString(new ArrayList<>(listeCoordonne));
+        itineraireAModifier.setLineStringCoordonnees(geoJsonLineString);
+
+        interactionMongoItineraire.save(itineraireAModifier);
+        return formattageItineraire(itineraireAModifier);
     }
 
     /** 
