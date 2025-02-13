@@ -11,21 +11,18 @@ import lombok.Setter;
 
 @Setter
 @Getter
-    public class ContactDTO {
-    // Getters and Setters
+public class ContactDTO {
+
     @NotBlank(message = "Le nom de l'entreprise ne peut pas être vide")
     @Size(max = 50, message = "Le nom de l'entreprise peut contenir au plus 50 caractères")
     private String nomEntreprise;
 
-    //@NotBlank(message = "Le nom de votre contact ne peut pas eêtre vide")
     @Size(max = 50, message = "Le nom de votre contact peut contenir au plus 50 caractères")
     private String nomContact;
 
-    //@NotBlank(message = "Le prénom de votre contact ne peut pas être vide")
     @Size(max = 50, message = "Le prénom de votre contact peut contenir au plus 50 caractères")
     private String prenomContact;
 
-    //@NotBlank(message = "Le numero de telephone du contact ne peut pas être vide")
     @Pattern(regexp = "^(?:\\+33|0)?([1-9]\\d{8})$",
         message = "Le numéro de téléphone du client doit être au format français (ex. : +33612345678)"
     )
@@ -51,6 +48,4 @@ import lombok.Setter;
 
     private boolean prospect;
 
-    private long id;
-    
 }
