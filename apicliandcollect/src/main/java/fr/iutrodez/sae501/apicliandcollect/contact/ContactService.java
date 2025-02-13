@@ -76,18 +76,18 @@ public class ContactService {
      * @param id l'id du contact à modifier
      */
     public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
-        Contact contacAmodifier = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
-        contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
-        contacAmodifier.setDescription(contactModifier.getDescription());
-        contacAmodifier.setAdresse(contactModifier.getAdresse());
-        contacAmodifier.setTelephone(contactModifier.getTelephone());
-        contacAmodifier.setNom(contactModifier.getNomContact());
-        contacAmodifier.setPrenom(contactModifier.getPrenomContact());
-        contacAmodifier.setProspect(contactModifier.isProspect());
+        Contact contactAModifier = interactionBdContact.findByUtilisateurAndId(u, id);
+        contactAModifier.setEntreprise(contactModifier.getNomEntreprise());
+        contactAModifier.setDescription(contactModifier.getDescription());
+        contactAModifier.setAdresse(contactModifier.getAdresse());
+        contactAModifier.setTelephone(contactModifier.getTelephone());
+        contactAModifier.setNom(contactModifier.getNomContact());
+        contactAModifier.setPrenom(contactModifier.getPrenomContact());
+        contactAModifier.setProspect(contactModifier.isProspect());
         ContactMongo contactMongoAmodifier = interactionMongoContact.findBy_id(id);
         contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
         interactionMongoContact.save(contactMongoAmodifier);
-        interactionBdContact.save(contacAmodifier);
+        interactionBdContact.save(contactAModifier);
     }
 
     /**
@@ -96,7 +96,7 @@ public class ContactService {
      * @param id l'id du contact à supprimer
      */
     public void supprimerContact(Utilisateur u, Long id) {
-        Contact contact = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
+        Contact contact = interactionBdContact.findByUtilisateurAndId(u, id);
         interactionBdContact.delete(contact);
         interactionMongoContact.deleteBy_id(id);
         interactionMongoItineraire.deleteByIdContact(id);
