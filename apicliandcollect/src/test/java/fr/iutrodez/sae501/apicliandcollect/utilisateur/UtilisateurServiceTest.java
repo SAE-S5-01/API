@@ -1,5 +1,7 @@
 package fr.iutrodez.sae501.apicliandcollect.utilisateur;
 
+import fr.iutrodez.sae501.apicliandcollect.contact.*;
+import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -10,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -25,7 +30,16 @@ class UtilisateurServiceTest {
     private InteractionBdUtilisateur interactionBdUtilisateur;
 
     @Mock
+    private InteractionBdContact interactionBdContact;
+
+    @Mock
     private InteractionMongoUtilisateur interactionMongoUtilisateur;
+
+    @Mock
+    private InteractionMongoContact interactionMongoContact;
+
+    @Mock
+    private InteractionMongoItineraire interactionMongoItineraire;
 
     @Mock
     private PasswordEncoder encoderMotPasse;
@@ -33,9 +47,16 @@ class UtilisateurServiceTest {
     @InjectMocks
     private UtilisateurService utilisateurService;
 
+    @InjectMocks
+    private ContactService contactService;
+
     private UtilisateurDTO utilisateurDTO;
 
-    Long id = 1L;
+    private ContactDTO contactDTO;
+
+    Long idUtilisateur = 1L;
+
+    Long idContact = 1L;
 
     @BeforeEach
     public void setUp() {
@@ -51,6 +72,18 @@ class UtilisateurServiceTest {
 
         utilisateurService = new UtilisateurService();
 
+        contactDTO = new ContactDTO();
+        contactDTO.setNomEntreprise("EntrepriseTest");
+        contactDTO.setNomContact("NomTest");
+        contactDTO.setPrenomContact("PrenomTest");
+        contactDTO.setDescription("Une description");
+        contactDTO.setTelephone("+33612857496");
+        contactDTO.setAdresse("AdresseTest");
+        contactDTO.setLatitude(48.858370);
+        contactDTO.setLongitude(2.294481);
+
+        contactService = new ContactService();
+
         MockitoAnnotations.initMocks(this);
     }
 
@@ -62,7 +95,7 @@ class UtilisateurServiceTest {
         when(encoderMotPasse.encode(utilisateurDTO.getMotDePasse())).thenReturn(motDePasseEncode);
 
         Utilisateur utilisateur = new Utilisateur();
-        utilisateur.setId(id);
+        utilisateur.setId(idUtilisateur);
         utilisateur.setNom(utilisateurDTO.getNom());
         utilisateur.setPrenom(utilisateurDTO.getPrenom());
         utilisateur.setMail(utilisateurDTO.getMail());
@@ -97,13 +130,42 @@ class UtilisateurServiceTest {
     void supprimerUtilisateurTest() {
 
         Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setId(idUtilisateur);
         utilisateur.setNom(utilisateurDTO.getNom());
         utilisateur.setPrenom(utilisateurDTO.getPrenom());
         utilisateur.setMail(utilisateurDTO.getMail());
         utilisateur.setMotDePasse(utilisateurDTO.getMotDePasse());
         utilisateur.setAdresse(utilisateurDTO.getAdresse());
 
+        UtilisateurMongo utilisateurMongo = new UtilisateurMongo();
+        utilisateurMongo.set_id(utilisateur.getId());
+        utilisateurMongo.setLocation(new GeoJsonPoint(utilisateurDTO.getLongitude(), utilisateurDTO.getLatitude()));
+
+        Contact contactSQL = new Contact();
+        contactSQL.setId(idContact);
+        contactSQL.setEntreprise(contactDTO.getNomEntreprise());
+        contactSQL.setNom(contactDTO.getNomContact());
+        contactSQL.setPrenom(contactDTO.getPrenomContact());
+        contactSQL.setDescription(contactDTO.getDescription());
+        contactSQL.setTelephone(contactDTO.getTelephone());
+        contactSQL.setAdresse(contactDTO.getAdresse());
+        contactSQL.setUtilisateur(utilisateur);
+
+        ContactMongo contactMongo = new ContactMongo();
+        contactMongo.set_id(idContact);
+        contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
+
+        List<Contact> contacts = new ArrayList<>();
+        contacts.add(contactSQL);
+
+        when(interactionBdContact.findByUtilisateur(Mockito.any(Utilisateur.class))).thenReturn(contacts);
+
         doNothing().when(interactionBdUtilisateur).delete(Mockito.any(Utilisateur.class));
+        doNothing().when(interactionMongoUtilisateur).deleteBy_id(Mockito.any(Long.class));
+        doNothing().when(interactionBdContact).deleteByUtilisateur(Mockito.any(Utilisateur.class));
+        doNothing().when(interactionMongoContact).deleteBy_id(Mockito.any(Long.class));
+
+        doNothing().when(interactionMongoItineraire).deleteByIdCreateur(Mockito.any(Long.class));
 
         utilisateurService.supprimerUtilisateur(utilisateur);
 

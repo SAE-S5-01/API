@@ -1,5 +1,5 @@
 /*
- * ControleurContact.java                                                                                   04 fev. 2025
+ * ControleurContact.java                                12 fev. 2025
  * IUT de Rodez, pas de copyright ni de "copyleft".
  */
 
@@ -16,29 +16,54 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api")
 public class ControleurContact {
 
+    private final static String SUCCES_MODIFICATION = "Client modifié avec succès";
+
+    private final static String SUCCES_SUPPRESSION = "Client supprimé avec succès";
+
     @Autowired
     ContactService service;
 
-    private static final String SUCCES_MODIFICATION = "Client modifié avec succès";
-
-    private static final String SUCCES_SUPPRESSION = "Client supprimé avec succès";
+    /**
+     * Représente une réponse indiquant si un client est proche ou non.
+     * @param estProche Un booléen indiquant si le client est proche ou non
+     */
+    private record ReponseEstProche(boolean estProche) {}
 
     /**
      * Récupère la liste des contacts de l'utilisateur connecté.
      *
-     * @param Utilisateur l'utilisateur connecté
-     * @return une entité de réponse contenant la liste des contacts de l'utilisateur
+     * @param Utilisateur L'utilisateur connecté
+     * @return Une entité de réponse contenant la liste des contacts de l'utilisateur
      */
     @GetMapping("/contact")
-    public ResponseEntity<List<ContactDTO>> obtenirContact(Authentication Utilisateur) {
+    public ResponseEntity<List<ContactDTO>> obtenirContacts(Authentication Utilisateur) {
         Utilisateur u = (Utilisateur) Utilisateur.getPrincipal();
         List<ContactDTO> contact = service.listeContact(u);
         return new ResponseEntity<>(contact, HttpStatus.OK);
+    }
+
+    /**
+     * Récupère la liste des prospects proches de l'utilisateur connecté.
+     * @param utilisateur L'utilisateur connecté
+     * @return Une entité de réponse contenant la liste des prospects proches de l'utilisateur
+     */
+    @GetMapping("/contact/prospect/proche")
+    public ResponseEntity<List<ContactDTO>> obtenirProspectsProches(Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        List<ContactDTO> contact = service.getProspectsProches(u);
+        return new ResponseEntity<>(contact, HttpStatus.OK);
+    }
+
+    @GetMapping("/contact/client/{id}/proche")
+    public ResponseEntity<ReponseEstProche> estClientProche(@PathVariable Long id, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+
+        return new ResponseEntity<>(new ReponseEstProche(service.isClientProche(u, id)),
+                                    HttpStatus.OK);
     }
 
     /**
