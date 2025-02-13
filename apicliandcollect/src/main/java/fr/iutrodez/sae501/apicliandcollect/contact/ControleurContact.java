@@ -14,13 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class ControleurContact {
-
-    private final static String SUCCES_MODIFICATION = "Client modifié avec succès";
 
     private final static String SUCCES_SUPPRESSION = "Client supprimé avec succès";
 
@@ -82,18 +81,19 @@ public class ControleurContact {
     }
 
     /**
-     * Modifie un contact de l'utilisateur connecté
+     * Modifie un contact de l'utilisateur connecté.
+     * Si l'adresse a changé, supprime tous les itinéraires contenant ce contact.
      * @param contactModifier Le contact à modifier
      * @param id L'identifiant du contact à supprimer (passé dans l'URL)
      * @param utilisateur L'utilisateur connecté
-     * @return Un message de succès
+     * @return Une liste des ID des itinéraires supprimés
      */
     @PutMapping("/contact")
-    public ResponseEntity<ReponseTextuelle> modifierClient(@Valid @RequestBody ContactDTO contactModifier, @RequestParam String id, Authentication utilisateur) {
+    public ResponseEntity<ArrayList> modifierClient(@Valid @RequestBody ContactDTO contactModifier, @RequestParam String id, Authentication utilisateur) {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         Long ID = Long.parseLong(id);
-        service.modifierContact(contactModifier, u, ID);
-        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_MODIFICATION), HttpStatus.OK);
+        ArrayList<String> idItinerairesSupprimes = service.modifierContact(contactModifier, u, ID);
+        return new ResponseEntity<>(idItinerairesSupprimes, HttpStatus.OK);
     }
 
     /**
