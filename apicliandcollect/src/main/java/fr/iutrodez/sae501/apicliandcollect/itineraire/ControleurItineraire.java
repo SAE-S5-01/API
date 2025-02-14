@@ -43,8 +43,7 @@ public class    ControleurItineraire {
         /*
          * Ajout du domicile en premier élément de la liste , id -1 car sera retiré plus tard.
          */
-        liste.putFirst(-1L, listePoint.getDomicile());
-        String itineraireCalcule = itineraireService.calculerItineraire(liste);
+        String itineraireCalcule = itineraireService.calculerItineraire(liste , listePoint.getDomicile());
         return new ResponseEntity<>(itineraireCalcule, HttpStatus.OK);
 
     }

@@ -74,7 +74,7 @@ public class UtilitaireItineraire {
      * @param Points Liste des points
      * @return Liste des permutations
      */
-    private static List<List<Long>> generatePermutations(List<Long> Points) {
+    public static List<List<Long>> genererPermutations(List<Long> Points) {
         List<List<Long>> result = new ArrayList<>();
         permute(Points, 0, result);
         return result;
@@ -206,6 +206,21 @@ public class UtilitaireItineraire {
     }
 
     /**
+     * Génère un index pour les clients.
+     * @param listeClient Liste des clients
+     * @return Map des id des clients et leur index
+     */
+    public static Map<Long, Integer> genererIndexClient(LinkedHashMap<Long, Point> listeClient) {
+        Map<Long, Integer> indexMap = new HashMap<>();
+        int index = 0;
+        for (Long key : listeClient.keySet()) {
+            indexMap.put(key, index++);
+        }
+        indexMap.put(-1L, listeClient.size()); // Domicile à la dernière position
+        return indexMap;
+    }
+
+    /**
      * Main pour test
      * @param args
      */
@@ -221,15 +236,10 @@ public class UtilitaireItineraire {
         listeClient.put(778L, new Point(-0.5792, 44.8378)); // Bordeaux
         listeClient.put(88888L, new Point(1.4442, 43.6047));  // Toulouse
 
-        List<List<Long>> permutations = generatePermutations(new ArrayList<>(listeClient.keySet()));
+        List<List<Long>> permutations = genererPermutations(new ArrayList<>(listeClient.keySet()));
         listeClient.put(-1L, Domicile);
         Double[][] distances = genererDistance(new ArrayList<>(listeClient.values()));
-        Map<Long, Integer> indexMap = new HashMap<>();
-        int index = 0;
-        for (Long key : listeClient.keySet()) {  // listeClient est la LinkedHashMap
-            indexMap.put(key, index++);
-        }
-        indexMap.put(-1L, listeClient.size()); // Domicile à la dernière position
+        Map<Long, Integer> indexMap = genererIndexClient(listeClient);
         List<Long> distanceOptiBrut = forceBrut(indexMap , permutations , distances);
 
     }
