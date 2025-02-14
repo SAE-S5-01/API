@@ -16,6 +16,14 @@ public interface InteractionMongoItineraire extends MongoRepository<Itineraire, 
 
     Itineraire findBy_idAndIdCreateur(String id, Long idCreateur);
 
+    /**
+     * Récupérer tous les itinéraires dont la liste de contacts contient un certain id
+     * @param idContact ID du contact
+     * @return Liste des itinéraires correspondants
+     */
+    @Query(value = "{ 'listeIdContact': ?0 }")
+    ArrayList<Itineraire> findByIdContact(long idContact);
+
     void deleteByIdCreateur(long idCreateur);
 
     @Query(value = "{ 'listeIdContact': ?0 }", delete = true)

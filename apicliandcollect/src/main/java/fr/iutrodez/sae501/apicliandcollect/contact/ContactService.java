@@ -6,19 +6,17 @@
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
 import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
+import fr.iutrodez.sae501.apicliandcollect.itineraire.Itineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionMongoUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
-import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
-import org.springframework.data.mongodb.core.index.GeospatialIndex;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,15 +69,28 @@ public class ContactService {
 
     /**
      * Modifie un contact donné
-     * @param contactModifier les nouvelles informations de contact
-     * @param u l'utilisateur connecté
-     * @param id l'id du contact à modifier
+     * @param contactModifier Les nouvelles informations de contact
+     * @param u L'utilisateur connecté
+     * @param id L'id du contact à modifier
+     * @return La liste des itinéraires supprimés
      */
-    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
+    public ArrayList<String> modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
+        ArrayList<String> idItinerairesSupprimes = new ArrayList<>();
+
         Contact contactAModifier = interactionBdContact.findByUtilisateurAndId(u, id);
         contactAModifier.setEntreprise(contactModifier.getNomEntreprise());
         contactAModifier.setDescription(contactModifier.getDescription());
+
+        if (!contactAModifier.getAdresse().equals(contactModifier.getAdresse())) {
+            ArrayList<Itineraire> itinerairesCorrespondants = interactionMongoItineraire.findByIdContact(id);
+
+            for (Itineraire i : itinerairesCorrespondants) {
+                idItinerairesSupprimes.add(i.get_id());
+                interactionMongoItineraire.delete(i);
+            }
+        }
         contactAModifier.setAdresse(contactModifier.getAdresse());
+
         contactAModifier.setTelephone(contactModifier.getTelephone());
         contactAModifier.setNom(contactModifier.getNomContact());
         contactAModifier.setPrenom(contactModifier.getPrenomContact());
@@ -88,6 +99,8 @@ public class ContactService {
         contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
         interactionMongoContact.save(contactMongoAmodifier);
         interactionBdContact.save(contactAModifier);
+
+        return idItinerairesSupprimes;
     }
 
     /**

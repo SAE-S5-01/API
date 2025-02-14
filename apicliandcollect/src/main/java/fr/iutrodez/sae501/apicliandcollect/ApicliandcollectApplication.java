@@ -1,5 +1,5 @@
 /*
- * ApicliandcollectApplication.java                                                                         04 fev. 2025
+ * ApicliandcollectApplication.java                      13 fev. 2025
  * IUT de Rodez, pas de copyright ni de "copyleft".
  */
 
