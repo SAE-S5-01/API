@@ -34,8 +34,8 @@ public class ItineraireService {
 
 
     // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
-    public String calculerItineraire(
-            LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
+    public String calculerItineraire(LinkedHashMap<Long, Point> listeClients)
+        throws JsonProcessingException {
         LinkedHashMap<String , Point> listeClientsFormatte = new LinkedHashMap<>();
         return formattageItineraire(listeClients);
     }
@@ -47,8 +47,7 @@ public class ItineraireService {
      * @return L'itinéraire créé
      * @throws JsonProcessingException Erreur de formatage JSON
      */
-    public String creerItineraire(long idCreateur , ItineraireDTO itineraire) throws JsonProcessingException {
-
+    public String creerItineraire(long idCreateur, ItineraireDTO itineraire) throws JsonProcessingException {
         Collection<Point> listeCoordonne = itineraire.getListePoint().values();
         String nomItineraire = itineraire.getNomItineraire();
 
@@ -77,7 +76,7 @@ public class ItineraireService {
      * Modifie un itinéraire
      * @param idCreateur ID de l'utilisateur modifiant l'itinéraire
      * @param id ID de l'itinéraire à modifier
-     * @param itineraire Objet contenant les informations de l'itinéraire
+     * @param itineraire Objet contenant les nouvelles informations de l'itinéraire
      * @return L'itinéraire modifié
      * @throws JsonProcessingException Erreur de formatage JSON
      */
@@ -111,7 +110,7 @@ public class ItineraireService {
     public void supprimerItineraire(Utilisateur u, String id) {
         Itineraire itineraire = interactionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
         interactionMongoItineraire.delete(itineraire);
-        // TODO : vérifier si besoin suppression autre...
+        // TODO : action pour parcours associé ??
     }
 
     /**
