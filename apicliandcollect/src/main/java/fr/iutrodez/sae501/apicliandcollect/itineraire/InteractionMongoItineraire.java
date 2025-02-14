@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public interface InteractionMongoItineraire extends MongoRepository<Itineraire, String> {
 
+    boolean existsByNomItineraireAndIdCreateur(String nomItineraire, Long idCreateur);
+
     ArrayList<Itineraire> findByIdCreateur(Long idCreateur);
 
     Itineraire findBy_idAndIdCreateur(String id, Long idCreateur);
