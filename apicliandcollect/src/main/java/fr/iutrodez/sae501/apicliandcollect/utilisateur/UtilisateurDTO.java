@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,6 +54,12 @@ public class UtilisateurDTO {
     @Max(message = "La latitude ne peut pas dépasser 90°", value = 90)
     @Min(message = "La latitude ne peut pas être en dessous de -90°", value = -90)
     private double latitude;
+
+    /** Ajouter une validation pour vérifier que les coordonnées ne sont pas égales à 0.0 */
+    @AssertTrue(message = "La longitude et la latitude ne peuvent pas être égales à 0.0")
+    public boolean isCoordinatesValid() {
+        return longitude != 0.0 && latitude != 0.0;
+    }
 
     @Constraint(validatedBy = EmailUniqueValidator.class)
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })

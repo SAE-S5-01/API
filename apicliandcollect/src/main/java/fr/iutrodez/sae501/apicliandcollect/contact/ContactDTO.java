@@ -5,35 +5,48 @@
 
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.UtilisateurDTO;
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Setter
 @Getter
-    public class ContactDTO {
-    // Getters and Setters
+public class ContactDTO {
+
     @NotBlank(message = "Le nom de l'entreprise ne peut pas être vide")
     @Size(max = 50, message = "Le nom de l'entreprise peut contenir au plus 50 caractères")
     private String nomEntreprise;
 
-    //@NotBlank(message = "Le nom de votre contact ne peut pas eêtre vide")
     @Size(max = 50, message = "Le nom de votre contact peut contenir au plus 50 caractères")
     private String nomContact;
 
-    //@NotBlank(message = "Le prénom de votre contact ne peut pas être vide")
     @Size(max = 50, message = "Le prénom de votre contact peut contenir au plus 50 caractères")
     private String prenomContact;
 
-    //@NotBlank(message = "Le numero de telephone du contact ne peut pas être vide")
-    @Pattern(regexp = "^(?:\\+33|0)?([1-9]\\d{8})$",
+    @Nullable
+    @Pattern(regexp = "^((?:\\+33|0)?([1-9]\\d{8}))$|^$",
         message = "Le numéro de téléphone du client doit être au format français (ex. : +33612345678)"
     )
     private String telephone;
 
     private Long ID;
 
-    // TODO verifier existence de l'adresse
     @NotBlank(message = "L'adresse postale de l'entreprise ne peut pas être vide")
     @Size(max = 300, message = "L'adresse postale de l'entreprise peut contenir au plus 300 caractères")
     private String adresse;
@@ -51,6 +64,4 @@ import lombok.Setter;
 
     private boolean prospect;
 
-    private long id;
-    
 }
