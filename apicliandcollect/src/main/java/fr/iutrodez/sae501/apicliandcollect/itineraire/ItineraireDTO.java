@@ -33,8 +33,7 @@ import java.util.LinkedHashMap;
 public class ItineraireDTO {
 
     private Point domicile;
-
-    @UniqueName
+    
     @Size(max = 50, message = "Le nom de l'itinéraire ne doit pas dépasser 50 caractères")
     private String nomItineraire;
 
