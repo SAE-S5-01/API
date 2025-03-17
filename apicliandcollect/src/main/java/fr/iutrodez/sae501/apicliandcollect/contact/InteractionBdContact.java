@@ -15,9 +15,6 @@ import java.util.List;
 public interface InteractionBdContact extends JpaRepository<Contact, Long> {
     List<Contact> findByUtilisateur(Utilisateur u);
 
-    @Query("SELECT concat(c.nom, ' ',  c.prenom) FROM Contact c WHERE c.id = :id")
-    String findNameById(@Param("id") Long id);
-
     Contact findByUtilisateurAndId(Utilisateur u, Long id);
 
     @Query("SELECT c.entreprise FROM Contact c WHERE c.id = :id")

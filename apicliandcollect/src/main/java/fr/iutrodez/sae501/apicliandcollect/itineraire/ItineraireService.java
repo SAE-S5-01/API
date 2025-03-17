@@ -164,7 +164,7 @@ public class ItineraireService {
         for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
             Long id = entry.getKey();
             Point point = entry.getValue();
-            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
+            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findEntrepriseById(id), point.getY(), point.getX()));
         }
 
         // Ajouter le point d'arrivée
