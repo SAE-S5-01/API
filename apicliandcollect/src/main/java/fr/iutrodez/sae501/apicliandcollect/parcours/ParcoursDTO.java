@@ -29,7 +29,7 @@ public class ParcoursDTO {
     private Long id;
 
     @ValidStatutParcours
-    private StatutParcours statut;
+    private StatutParcours statut = StatutParcours.EN_COURS;
 
     private Date dateCreation = new Date();
 

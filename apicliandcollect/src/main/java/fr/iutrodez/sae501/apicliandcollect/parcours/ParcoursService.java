@@ -48,7 +48,7 @@ public class ParcoursService {
         if (parcoursACreer.getStatut() == StatutParcours.EN_COURS) {
             interactionBdParcours.updateStatutByUtilisateurAndStatut(u, StatutParcours.EN_COURS, StatutParcours.EN_PAUSE);
         }
-        
+
         Parcours parcours = new Parcours();
         parcours.setStatut(StatutParcours.EN_COURS);
         parcours.setDateCreation(parcoursACreer.getDateCreation());
