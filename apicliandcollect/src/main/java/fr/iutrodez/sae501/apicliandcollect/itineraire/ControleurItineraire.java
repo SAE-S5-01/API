@@ -22,8 +22,6 @@ import java.util.LinkedHashMap;
 @RequestMapping("/api")
 public class    ControleurItineraire {
 
-    private static final String SUCCES_MODIFICATION = "Itinéraire modifié avec succès";
-
     private static final String SUCCES_SUPPRESSION = "Itinéraire supprimé avec succès";
 
     @Autowired

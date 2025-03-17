@@ -9,6 +9,7 @@ import fr.iutrodez.sae501.apicliandcollect.contact.Contact;
 import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,6 @@ public class ParcoursService {
      */
     public ParcoursDTO creerParcours(ParcoursDTO parcoursACreer, Utilisateur u)
         throws IllegalArgumentException {
-        Contact dernierContactVisite = interactionBdContact.findById(parcoursACreer.getIdDernierContactVisite()).get();
 
         if (interactionMongoItineraire.findBy_idAndIdCreateur(parcoursACreer.getIdItineraire(), u.getId()) == null) {
             throw new IllegalArgumentException("L'itinéraire n'existe pas");
@@ -47,7 +47,12 @@ public class ParcoursService {
         parcours.setStatut(StatutParcours.EN_COURS);
         parcours.setDateCreation(parcoursACreer.getDateCreation());
         parcours.setIdItineraire(parcoursACreer.getIdItineraire());
-        parcours.setDernierContactVisite(dernierContactVisite);
+
+        if (parcoursACreer.getIdDernierContactVisite() != null) {
+            Contact dernierContactVisite = interactionBdContact.findById(parcoursACreer.getIdDernierContactVisite()).get();
+            parcours.setDernierContactVisite(dernierContactVisite);
+        }
+
         parcours.setUtilisateur(u);
         Parcours resultat = interactionBdParcours.save(parcours);
 
@@ -60,12 +65,25 @@ public class ParcoursService {
      * @param u L'utilisateur connecté
      * @param id L'id du parcours à modifier
      */
+    @Transactional
     public void modifierParcours(ParcoursDTO parcoursModifie, Utilisateur u, Long id) {
-        Parcours parcours = interactionBdParcours.findByUtilisateurAndId(u, id).getFirst();
+        // Si le nouveau statut est EN_COURS, passer tous les autres à EN_PAUSE en une requête
+        if (parcoursModifie.getStatut() == StatutParcours.EN_COURS) {
+            interactionBdParcours.updateStatutByUtilisateurAndStatut(u, StatutParcours.EN_COURS, StatutParcours.EN_PAUSE);
+        }
 
+        Parcours parcours = interactionBdParcours.findByUtilisateurAndId(u, id).getFirst();
         parcours.setStatut(parcoursModifie.getStatut());
-        parcours.setDernierContactVisite(interactionBdContact.findById(parcoursModifie.getIdDernierContactVisite()).get());
+
+        if (parcoursModifie.getIdDernierContactVisite() != null) {
+            parcours.setDernierContactVisite(interactionBdContact.findById(parcoursModifie.getIdDernierContactVisite()).get());
+        }
         interactionBdParcours.save(parcours);
+    }
+
+    public List<ParcoursDTO> listeParcours(Utilisateur u) {
+        List<Parcours> parcours = interactionBdParcours.findByUtilisateur(u);
+        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
     }
 
     /**
@@ -92,7 +110,9 @@ public class ParcoursService {
         parcoursDTO.setStatut(parcours.getStatut());
         parcoursDTO.setDateCreation(parcours.getDateCreation());
         parcoursDTO.setIdItineraire(parcours.getIdItineraire());
-        parcoursDTO.setIdDernierContactVisite(parcours.getDernierContactVisite().getId());
+        parcoursDTO.setIdDernierContactVisite(parcours.getDernierContactVisite() != null
+                                              ? parcours.getDernierContactVisite().getId()
+                                              : null);
         return parcoursDTO;
     }
 

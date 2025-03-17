@@ -31,12 +31,9 @@ public class ItineraireService {
     @Autowired
     private InteractionBdContact interactionBdContact;
 
-    public String calculerItineraire(
-            LinkedHashMap<Long, Point> listeClients, Point domicile) throws JsonProcessingException {
-
-
+    public String calculerItineraire(LinkedHashMap<Long, Point> listeClients, Point domicile) throws JsonProcessingException {
         List<List<Long>> permutations = genererPermutations(new ArrayList<>(listeClients.keySet()));
-        listeClients.put(-1L, domicile); // ajout du domicile a la fin de la map
+        listeClients.put(-1L, domicile); // ajout du domicile à la fin de la map
         Double[][] distances = genererDistance(new ArrayList<>(listeClients.values()));
         Map<Long , Integer> indexClient = genererIndexClient(listeClients);
         List<Long> cheminOptimise = forceBrut(indexClient , permutations , distances);

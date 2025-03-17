@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,7 +35,7 @@ public class ParcoursDTO {
 
     private String idItineraire;
 
-    private Long idDernierContactVisite;
+    private Long idDernierContactVisite = null;
 
     /**
      * Annotation pour valider le statut d'un parcours
