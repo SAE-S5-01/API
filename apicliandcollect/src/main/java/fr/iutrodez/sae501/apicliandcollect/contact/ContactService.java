@@ -5,23 +5,41 @@
 
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
+import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
+import fr.iutrodez.sae501.apicliandcollect.itineraire.Itineraire;
+import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionMongoUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Metrics;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ContactService {
 
+    private final static Distance DISTANCE_PROSPECT_PROCHE
+    = new Distance(1.0, Metrics.KILOMETERS);
+
+    private final static Distance DISTANCE_CLIENT_PROCHE
+    = new Distance(0.2, Metrics.KILOMETERS);
+
     @Autowired
     private InteractionBdContact interactionBdContact;
 
     @Autowired
     private InteractionMongoContact interactionMongoContact;
+
+    @Autowired
+    private InteractionMongoItineraire interactionMongoItineraire;
+
+    @Autowired
+    private InteractionMongoUtilisateur interactionMongoUtilisateur;
 
     /**
      * Crée un nouveau contact pour l'utilisateur u
@@ -49,30 +67,52 @@ public class ContactService {
         return contactEnJson(resultat , localisation);
     }
 
-    public void modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
-        Contact contacAmodifier = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
-        contacAmodifier.setEntreprise(contactModifier.getNomEntreprise());
-        contacAmodifier.setDescription(contactModifier.getDescription());
-        contacAmodifier.setAdresse(contactModifier.getAdresse());
-        contacAmodifier.setTelephone(contactModifier.getTelephone());
-        contacAmodifier.setNom(contactModifier.getNomContact());
-        contacAmodifier.setPrenom(contactModifier.getPrenomContact());
-        contacAmodifier.setProspect(contactModifier.isProspect());
+    /**
+     * Modifie un contact donné
+     * @param contactModifier Les nouvelles informations de contact
+     * @param u L'utilisateur connecté
+     * @param id L'id du contact à modifier
+     * @return La liste des itinéraires supprimés
+     */
+    public ArrayList<String> modifierContact(ContactDTO contactModifier, Utilisateur u, Long id) {
+        ArrayList<String> idItinerairesSupprimes = new ArrayList<>();
+
+        Contact contactAModifier = interactionBdContact.findByUtilisateurAndId(u, id);
+        contactAModifier.setEntreprise(contactModifier.getNomEntreprise());
+        contactAModifier.setDescription(contactModifier.getDescription());
+
+        if (!contactAModifier.getAdresse().equals(contactModifier.getAdresse())) {
+            ArrayList<Itineraire> itinerairesCorrespondants = interactionMongoItineraire.findByIdContact(id);
+
+            for (Itineraire i : itinerairesCorrespondants) {
+                idItinerairesSupprimes.add(i.get_id());
+                interactionMongoItineraire.delete(i);
+            }
+        }
+        contactAModifier.setAdresse(contactModifier.getAdresse());
+
+        contactAModifier.setTelephone(contactModifier.getTelephone());
+        contactAModifier.setNom(contactModifier.getNomContact());
+        contactAModifier.setPrenom(contactModifier.getPrenomContact());
+        contactAModifier.setProspect(contactModifier.isProspect());
         ContactMongo contactMongoAmodifier = interactionMongoContact.findBy_id(id);
         contactMongoAmodifier.setLocation(new GeoJsonPoint(contactModifier.getLongitude(), contactModifier.getLatitude()));
         interactionMongoContact.save(contactMongoAmodifier);
-        interactionBdContact.save(contacAmodifier);
+        interactionBdContact.save(contactAModifier);
+
+        return idItinerairesSupprimes;
     }
 
     /**
      * Supprime le contact d'id id
+     * @param u l'utilisateur connecté
      * @param id l'id du contact à supprimer
      */
     public void supprimerContact(Utilisateur u, Long id) {
-        Contact contact = interactionBdContact.findByUtilisateurAndId(u, id).getFirst();
+        Contact contact = interactionBdContact.findByUtilisateurAndId(u, id);
         interactionBdContact.delete(contact);
-        interactionMongoContact.delete(interactionMongoContact.findBy_id(id));
-        // TODO : vérifier si besoin suppression autre...
+        interactionMongoContact.deleteBy_id(id);
+        interactionMongoItineraire.deleteByIdContact(id);
     }
 
     /**
@@ -92,11 +132,43 @@ public class ContactService {
     }
 
     /**
+     * Récupère la liste des prospects à moins de 1000m de l'utilisateur.
+     * @param u L'utilisateur connecté
+     * @return La liste des prospects proches
+     */
+    public List<ContactDTO> getProspectsProches(Utilisateur u) {
+        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+
+        List<ContactMongo> prospectsProches
+        = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
+
+        return prospectsProches.stream().map(prospect -> {
+            Contact contact = interactionBdContact.findById(prospect.get_id()).get();
+            return contactEnJson(contact, prospect);
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Vérifie si le client est proche de l'utilisateur
+     * @param u L'utilisateur connecté
+     * @param idClient L'id du client
+     * @return true si le client est proche, false sinon
+     */
+    public boolean isClientProche(Utilisateur u, long idClient) {
+        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+
+        List<ContactMongo> clientsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_CLIENT_PROCHE);
+
+        return clientsProches.stream()
+            .anyMatch(client -> client.get_id() == idClient);
+    }
+
+    /**
      * Convertit un contact en JSON
      *
-     * @param contact      le contact à convertir
-     * @param localisation
-     * @return le contact converti en JSON
+     * @param contact Le contact à convertir
+     * @param localisation La localisation du contact
+     * @return Le contact converti en JSON
      */
     public ContactDTO contactEnJson(Contact contact, ContactMongo localisation) {
         ContactDTO contactDTO = new ContactDTO();
