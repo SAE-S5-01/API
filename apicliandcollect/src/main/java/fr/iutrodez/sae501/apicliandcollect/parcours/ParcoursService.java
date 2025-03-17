@@ -36,6 +36,7 @@ public class ParcoursService {
      * @throws IllegalArgumentException Si le contact ou l'itinéraire n'existe pas
      * @return Le parcours créé
      */
+    @Transactional
     public ParcoursDTO creerParcours(ParcoursDTO parcoursACreer, Utilisateur u)
         throws IllegalArgumentException {
 
@@ -43,6 +44,11 @@ public class ParcoursService {
             throw new IllegalArgumentException("L'itinéraire n'existe pas");
         }
 
+        // Si le nouveau statut est EN_COURS, passer tous les autres à EN_PAUSE en une requête
+        if (parcoursACreer.getStatut() == StatutParcours.EN_COURS) {
+            interactionBdParcours.updateStatutByUtilisateurAndStatut(u, StatutParcours.EN_COURS, StatutParcours.EN_PAUSE);
+        }
+        
         Parcours parcours = new Parcours();
         parcours.setStatut(StatutParcours.EN_COURS);
         parcours.setDateCreation(parcoursACreer.getDateCreation());
