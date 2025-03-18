@@ -6,7 +6,9 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.google.gson.JsonParser;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.geo.Point;
+import org.springframework.data.util.Pair;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
@@ -36,7 +38,6 @@ public class UtilitaireItineraire {
         min = distanceEntrePoint(localisation,listeClient.firstEntry().getValue());
         LinkedHashMap<Long,Point> clientOrdonnees = new LinkedHashMap<>();
 
-
         while(clientOrdonnees.size() < nbClient){
             Set<Long> ids = listeClient.keySet();
             id = listeClient.firstEntry().getKey();
@@ -64,6 +65,22 @@ public class UtilitaireItineraire {
         return clientOrdonnees;
     }
 
+    public static LinkedHashMap<Long, Point> calculeItineraireLittle(LinkedHashMap<Long,Point> listeClient){
+        List<Pair<Long,Long>> IDClientOrdonnees = AlgoLittleUtil.lancerAlgorithme(genererDistance(new ArrayList<>(listeClient.values())),
+                                                                                                listeClient.keySet());
+        LinkedHashMap<Long,Point> clientsOrdonnees = new LinkedHashMap<>();
+        Long depart = -1L;
+        for(int i = 0; i<listeClient.size(); i++){
+            for(Pair<Long,Long> couple : IDClientOrdonnees){
+                if(couple.getFirst().equals(depart)){
+                    clientsOrdonnees.put(depart,listeClient.get(depart));
+                    depart = couple.getSecond();
+                }
+            }
+        }
+        return clientsOrdonnees;
+    }
+
 
     public static double distanceEntrePoint(Point point1, Point point2) {
         return Math.sqrt(Math.pow(point2.getX() - point1.getX(), 2) + Math.pow(point2.getY() - point1.getY(), 2));
@@ -74,7 +91,7 @@ public class UtilitaireItineraire {
      * @param Points Liste des points
      * @return Liste des permutations
      */
-    public static List<List<Long>> genererPermutations(List<Long> Points) {
+    protected static List<List<Long>> genererPermutations(List<Long> Points) {
         List<List<Long>> result = new ArrayList<>();
         permute(Points, 0, result);
         return result;
@@ -241,7 +258,7 @@ public class UtilitaireItineraire {
         Double[][] distances = genererDistance(new ArrayList<>(listeClient.values()));
         Map<Long, Integer> indexMap = genererIndexClient(listeClient);
         List<Long> distanceOptiBrut = forceBrut(indexMap , permutations , distances);
-
+        calculeItineraireLittle(listeClient);
     }
 }
 
