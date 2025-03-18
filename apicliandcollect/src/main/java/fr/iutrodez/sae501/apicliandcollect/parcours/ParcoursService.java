@@ -29,6 +29,27 @@ public class ParcoursService {
     private InteractionMongoItineraire interactionMongoItineraire;
 
     /**
+     * Récupère la liste des parcours de l'utilisateur u
+     * @param u L'utilisateur connecté
+     * @return La liste des parcours de l'utilisateur
+     */
+    public List<ParcoursDTO> listeParcours(Utilisateur u) {
+        List<Parcours> parcours = interactionBdParcours.findByUtilisateur(u);
+        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère la liste des parcours de l'utilisateur u ayant un statut donné
+     * @param u L'utilisateur connecté
+     * @param statut Le statut des parcours à récupérer
+     * @return La liste des parcours de l'utilisateur
+     */
+    public List<ParcoursDTO> listeParcours(Utilisateur u, StatutParcours statut) {
+        List<Parcours> parcours = interactionBdParcours.findByUtilisateurAndStatut(u, statut);
+        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
+    }
+
+    /**
      * Crée un nouveau parcours pour l'utilisateur u
      *
      * @param parcoursACreer Le parcours à créer
@@ -87,21 +108,14 @@ public class ParcoursService {
         interactionBdParcours.save(parcours);
     }
 
-    public List<ParcoursDTO> listeParcours(Utilisateur u) {
-        List<Parcours> parcours = interactionBdParcours.findByUtilisateur(u);
-        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
-    }
-
     /**
-     * Récupère la liste des parcours de l'utilisateur u
-     *
+     * Supprime un parcours donné
      * @param u L'utilisateur connecté
-     * @param statut Le statut des parcours à récupérer
-     * @return La liste des parcours de l'utilisateur
+     * @param id L'id du parcours à supprimer
      */
-    public List<ParcoursDTO> listeParcours(Utilisateur u, StatutParcours statut) {
-        List<Parcours> parcours = interactionBdParcours.findByUtilisateurAndStatut(u, statut);
-        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
+    @Transactional
+    public void supprimerParcours(Utilisateur u, Long id) {
+        interactionBdParcours.deleteByUtilisateurAndId(u, id);
     }
 
     /**

@@ -23,6 +23,8 @@ public class ControleurParcours {
 
     private final static String SUCCES_MODIFICATION = "Parcours modifié avec succès";
 
+    private final static String SUCCES_SUPPRESSION = "Parcours supprimé avec succès";
+
     @Autowired
     ParcoursService service;
 
@@ -82,5 +84,18 @@ public class ControleurParcours {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         service.modifierParcours(parcoursModifie, u, id);
         return new ResponseEntity<>(new ReponseTextuelle(SUCCES_MODIFICATION), HttpStatus.OK);
+    }
+
+    /**
+     * Supprime un parcours de l'utilisateur connecté
+     * @param id L'identifiant du parcours à supprimer (passé dans l'URL)
+     * @param utilisateur L'utilisateur connecté
+     * @return Un message de succès
+     */
+    @DeleteMapping("/parcours/{id}")
+    public ResponseEntity<ReponseTextuelle> supprimerParcours(@PathVariable Long id, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        service.supprimerParcours(u, id);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION), HttpStatus.OK);
     }
 }

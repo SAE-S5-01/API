@@ -27,5 +27,5 @@ public interface InteractionBdParcours extends JpaRepository<Parcours, Long> {
     @Query("UPDATE Parcours p SET p.statut = :nouveauStatut WHERE p.utilisateur = :utilisateur AND p.statut = :ancienStatut")
     void updateStatutByUtilisateurAndStatut(Utilisateur utilisateur, StatutParcours ancienStatut, StatutParcours nouveauStatut);
 
-    void deleteByUtilisateur(Utilisateur u);
+    void deleteByUtilisateurAndId(Utilisateur u, Long id);
 }
