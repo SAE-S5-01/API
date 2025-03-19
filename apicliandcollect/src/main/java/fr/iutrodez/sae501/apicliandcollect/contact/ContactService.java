@@ -38,9 +38,6 @@ public class ContactService {
     @Autowired
     private InteractionMongoItineraire interactionMongoItineraire;
 
-    @Autowired
-    private InteractionMongoUtilisateur interactionMongoUtilisateur;
-
     /**
      * Crée un nouveau contact pour l'utilisateur u
      *
@@ -133,29 +130,32 @@ public class ContactService {
 
     /**
      * Récupère la liste des prospects à moins de 1000m de l'utilisateur.
-     * @param u L'utilisateur connecté
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
      * @return La liste des prospects proches
      */
-    public List<ContactDTO> getProspectsProches(Utilisateur u) {
-        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+    public List<ContactDTO> getProspectsProches(double longitude, double latitude) {
+        GeoJsonPoint localisation = new GeoJsonPoint(longitude, latitude);
 
         List<ContactMongo> prospectsProches
         = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
 
-        return prospectsProches.stream().map(prospect -> {
-            Contact contact = interactionBdContact.findById(prospect.get_id()).get();
-            return contactEnJson(contact, prospect);
-        }).collect(Collectors.toList());
+        return prospectsProches.stream()
+            .map(prospect -> interactionBdContact.findById(prospect.get_id()).get())
+            .filter(Contact::isProspect)  // Vérifie que le contact est bien un prospect
+            .map(contact -> contactEnJson(contact, interactionMongoContact.findBy_id(contact.getId())))
+            .collect(Collectors.toList());
     }
 
     /**
      * Vérifie si le client est proche de l'utilisateur
-     * @param u L'utilisateur connecté
      * @param idClient L'id du client
+     * @param latitude La latitude à comparer
+     * @param longitude La longitude à comparer
      * @return true si le client est proche, false sinon
      */
-    public boolean isClientProche(Utilisateur u, long idClient) {
-        GeoJsonPoint localisation = interactionMongoUtilisateur.findBy_id(u.getId()).getLocation();
+    public boolean isClientProche(long idClient, double longitude, double latitude) {
+        GeoJsonPoint localisation = new GeoJsonPoint(longitude, latitude);
 
         List<ContactMongo> clientsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_CLIENT_PROCHE);
 
