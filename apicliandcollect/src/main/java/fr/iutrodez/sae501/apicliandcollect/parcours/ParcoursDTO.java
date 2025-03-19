@@ -42,7 +42,7 @@ public class ParcoursDTO {
     private Long idDernierContactVisite = null;
 
     @JsonDeserialize(contentUsing = ParserGeoJson.class)
-    private GeoJsonPoint[] precedentesPositionGps;
+    private GeoJsonPoint[] positionsGpsPrecedentes;
 
     /**
      * Annotation pour valider le statut d'un parcours

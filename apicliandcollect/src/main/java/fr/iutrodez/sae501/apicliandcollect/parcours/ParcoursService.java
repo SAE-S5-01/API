@@ -37,7 +37,28 @@ public class ParcoursService {
      */
     public List<ParcoursDTO> listeParcours(Utilisateur u) {
         List<Parcours> parcours = interactionBdParcours.findByUtilisateur(u);
-        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
+
+        List<ParcoursDTO> result = parcours.stream().map(p -> {
+            ParcoursDTO dto = new ParcoursDTO();
+            dto.setId(p.getId());
+            dto.setStatut(p.getStatut());
+            dto.setDateCreation(p.getDateCreation());
+            dto.setIdItineraire(p.getIdItineraire());
+            dto.setIdDernierContactVisite(p.getDernierContactVisite() != null
+                    ? p.getDernierContactVisite().getId()
+                    : null);
+
+            // Vérifier si une ligne MongoDB existe pour ce parcours
+            ParcoursMongo parcoursMongo = interractionMongoParcours.findByIdParcours(p.getId());
+
+            // Ajouter les infos Mongo si elles existent
+            if (parcoursMongo != null && parcoursMongo.getPrecedentesPositionsGps() != null) {
+                dto.setPositionsGpsPrecedentes(parcoursMongo.getPrecedentesPositionsGps());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+        return result;
     }
 
     /**
@@ -48,7 +69,26 @@ public class ParcoursService {
      */
     public List<ParcoursDTO> listeParcours(Utilisateur u, StatutParcours statut) {
         List<Parcours> parcours = interactionBdParcours.findByUtilisateurAndStatut(u, statut);
-        return parcours.stream().map(this::parcoursEnJson).collect(Collectors.toList());
+        List<ParcoursDTO> result = parcours.stream().map(p -> {
+            ParcoursDTO dto = new ParcoursDTO();
+            dto.setId(p.getId());
+            dto.setStatut(p.getStatut());
+            dto.setDateCreation(p.getDateCreation());
+            dto.setIdItineraire(p.getIdItineraire());
+            dto.setIdDernierContactVisite(p.getDernierContactVisite() != null
+                    ? p.getDernierContactVisite().getId()
+                    : null);
+
+            // Vérifier si une ligne MongoDB existe pour ce parcours
+            ParcoursMongo parcoursMongo = interractionMongoParcours.findByIdParcours(p.getId());
+            // Ajouter les infos Mongo si elles existent
+            if (parcoursMongo != null && parcoursMongo.getPrecedentesPositionsGps() != null) {
+                dto.setPositionsGpsPrecedentes(parcoursMongo.getPrecedentesPositionsGps());
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+        return result;
     }
 
     /**
@@ -111,14 +151,11 @@ public class ParcoursService {
         if (parcoursModifie.getIdDernierContactVisite() != null) {
             parcours.setDernierContactVisite(interactionBdContact.findById(parcoursModifie.getIdDernierContactVisite()).get());
         }
-        if (parcoursModifie.getPrecedentesPositionGps() != null ) {
+        if (parcoursModifie.getPositionsGpsPrecedentes() != null ) {
 
             ParcoursMongo parcoursModifieMongo = interractionMongoParcours.findByIdParcours(parcours.getId());
-            if (parcoursModifieMongo == null) {
-                parcoursModifieMongo = new ParcoursMongo();
-            }
             parcoursModifieMongo.setIdParcours(parcours.getId());
-            parcoursModifieMongo.setPrecedentesPositionsGps(parcoursModifie.getPrecedentesPositionGps());
+            parcoursModifieMongo.setPrecedentesPositionsGps(parcoursModifie.getPositionsGpsPrecedentes());
             interractionMongoParcours.save(parcoursModifieMongo);
         }
         interactionBdParcours.save(parcours);
