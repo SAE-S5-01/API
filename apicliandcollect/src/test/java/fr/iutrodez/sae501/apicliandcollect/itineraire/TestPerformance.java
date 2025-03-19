@@ -20,7 +20,7 @@ public class TestPerformance {
         listeClient.put(6L, new Point(7.7521, 48.5734));
         listeClient.put(778L, new Point(-0.5792, 44.8378));
         listeClient.put(88888L, new Point(1.4442, 43.6047));
-        List<List<Long>> permutations = generatePermutations(new ArrayList<>(listeClient.keySet()));
+        List<List<Long>> permutations = genererPermutations(new ArrayList<>(listeClient.keySet()));
         listeClient.put(-1L,Domicile);
 
         LinkedHashMap<Long, Point> listeClientCopy = new LinkedHashMap<>(listeClient);
