@@ -35,6 +35,8 @@ class TestIntegration {
 
     // Route api pour la partit contact
     private final static String ROUTE_API = "/api/contact";
+    // base Api itinéraire
+    private final static String ROUTE_ITINERAIRE = "/api/itineraire";
 
     // Base de la route api utilisateur
     private static final String BASE_API_UTILISATEUR = "/api/utilisateur/";
@@ -47,9 +49,83 @@ class TestIntegration {
                     "prenomContact": "prenom contact",
                     "telephone": "+33612345678",
                     "description": "Client avant modif",
-                    "prospect": true,
-                    "longitude": 44.145678,
-                    "latitude": 2.123456
+                    "prospect": false,
+                    "longitude": 2.7227829999999997,
+                    "latitude": 44.4712353
+                }
+                """;
+
+    private static final String CLIENT_ITINERAIRE_1 = """
+                {
+                    "ID": 1,
+                    "nomEntreprise": "entreprise1",
+                    "adresse": "Adresse 1",
+                    "nomContact": "nom contact",
+                    "prenomContact": "prenom contact",
+                    "telephone": "+33612345678",
+                    "description": "client pour itineraire",
+                    "prospect": false,
+                    "longitude": 2.5726834999999997,
+                    "latitude": 44.35595800000001
+                }
+                """;
+
+    private static final String CLIENT_ITINERAIRE_2 = """
+                {
+                    "ID": 2,
+                    "nomEntreprise": "entreprise2",
+                    "adresse": "Adresse 2",
+                    "nomContact": "nom contact",
+                    "prenomContact": "prenom contact",
+                    "telephone": "+33612345678",
+                    "description": "client pour itineraire",
+                    "prospect": false,
+                    "longitude": 2.5758355,
+                    "latitude": 44.358561
+                }
+                """;
+
+    private static final String CLIENT_ITINERAIRE_3 = """
+                {
+                    "ID": 3,
+                    "nomEntreprise": "entreprise3",
+                    "adresse": "Adresse 3",
+                    "nomContact": "nom contact",
+                    "prenomContact": "prenom contact",
+                    "telephone": "+33612345678",
+                    "description": "client pour itineraire",
+                    "prospect": false,
+                    "longitude": 2.5737413,
+                    "latitude": 44.3539443
+                }
+                """;
+
+    private static final String CLIENT_ITINERAIRE_4 = """
+                {
+                    "ID": 4,
+                    "nomEntreprise": "entreprise4",
+                    "adresse": "Adresse 4",
+                    "nomContact": "nom contact",
+                    "prenomContact": "prenom contact",
+                    "telephone": "+33612345678",
+                    "description": "client pour itineraire",
+                    "prospect": false,
+                    "longitude": 2.7227829999999997,
+                    "latitude": 44.4712353
+                }
+                """;
+
+    private static final String ITINERAIRE =
+                """
+                {
+                    "nomItineraire": "Itineraire test",
+                    "domicile": {"x": 2.575986 , "y": 44.349388999999995},
+                    "listePoint": {
+                        "1": {"x": 2.5726834999999997 , "y": 44.35595800000001},
+                        "2": {"x": 2.5758355 , "y": 44.358561},
+                        "3": {"x": 2.5737413 , "y": 44.3539443},
+                        "4": {"x": 2.7227829999999997 , "y": 44.4712353}
+                    }
                 }
                 """;
 
@@ -67,8 +143,8 @@ class TestIntegration {
                     "nom": "test",
                     "prenom": "test",
                     "adresse": "adresse test",
-                    "latitude": 2.987654,
-                    "longitude": 44.321654
+                    "latitude": 44.321654,
+                    "longitude": 2.987654
                 }
                 """;
 
@@ -388,6 +464,141 @@ class TestIntegration {
 
     @Test
     @Order(13)
+    void supprimerClientTest() throws Exception{
+        creationClientAModifier();
+        mockMvc.perform(delete(ROUTE_API+"/"+id)
+                .header("Authorization", "Bearer "+con.get("token")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("Client supprimé avec succès"));
+    }
+
+    @Test
+    @Order(14)
+    void supprimerClientAvecIdInvalideShouldFail() throws Exception {
+        mockMvc.perform(delete(ROUTE_API+"/-1")
+                .header("Authorization", "Bearer "+con.get("token")))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    @Order(15)
+    void creerItineraireTest() throws Exception{
+        ajouterClient();
+        mockMvc.perform(post(ROUTE_ITINERAIRE)
+                        .header("Authorization", "Bearer "+con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ITINERAIRE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Order(16)
+    void creerItineraireInvalideshouldFail() throws Exception{
+        ajouterClient();
+        String itineraire =
+                """
+                {
+                    "nomItineraire": "Itineraire test",
+                    "domicile": {"x": 2.575986 , "y": 44.349388999999995},
+                    "listePoint": {
+                        {"x": 2.5726834999999997 , "y": 44.35595800000001},
+                        "2": {"x": 2.5758355 , "y": 44.358561},
+                        "3": {"x": 2.5737413 , "y": 44.3539443},
+                        "4": {"x": 2.7227829999999997 , "y": 44.4712353}
+                    }
+                }
+                """;
+        mockMvc.perform(post(ROUTE_ITINERAIRE)
+                        .header("Authorization", "Bearer "+con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itineraire))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    @Order(17)
+    void creerItineraireSansNomShouldFail() throws Exception{
+        ajouterClient();
+        String itineraire =
+                """
+                {
+                    "domicile": {"x": 2.575986 , "y": 44.349388999999995},
+                    "listePoint": {
+                        "1": {"x": 2.5726834999999997 , "y": 44.35595800000001},
+                        "2": {"x": 2.5758355 , "y": 44.358561},
+                        "3": {"x": 2.5737413 , "y": 44.3539443},
+                        "4": {"x": 2.7227829999999997 , "y": 44.4712353}
+                    }
+                }
+                """;
+        mockMvc.perform(post(ROUTE_ITINERAIRE)
+                        .header("Authorization", "Bearer "+con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itineraire))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("erreur.nomItineraire").value("L'itinéraire doit avoir un nom"));
+    }
+
+    @Test
+    @Order(18)
+    void creerItineraireSansDomicileShouldFail() throws Exception{
+        ajouterClient();
+        String itineraire =
+                """
+                {
+                    "nomItineraire": "test",
+                    "listePoint": {
+                        "1": {"x": 2.5726834999999997 , "y": 44.35595800000001},
+                        "2": {"x": 2.5758355 , "y": 44.358561},
+                        "3": {"x": 2.5737413 , "y": 44.3539443},
+                        "4": {"x": 2.7227829999999997 , "y": 44.4712353}
+                    }
+                }
+                """;
+        mockMvc.perform(post(ROUTE_ITINERAIRE)
+                        .header("Authorization", "Bearer "+con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itineraire))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("erreur.domicile").value("Le domicile doit être renseigné"));
+    }
+
+    @Test
+    @Order(19)
+    void creerItineraireSansListePointShouldFail() throws Exception {
+        ajouterClient();
+        String itineraire =
+                """
+                        {
+                            "nomItineraire": "test",
+                            "domicile": {"x": 2.575986 , "y": 44.349388999999995}
+                        }
+                        """;
+        mockMvc.perform(post(ROUTE_ITINERAIRE)
+                        .header("Authorization", "Bearer " + con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itineraire))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    @Order(20)
+    void calculerItineraire() throws Exception{
+        mockMvc.perform(post(ROUTE_ITINERAIRE+"/calculer")
+                    .header("Authorization", "Bearer "+con.get("token"))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(ITINERAIRE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("itineraire.[0].id").value("-1"))
+                .andExpect(jsonPath("itineraire.[1].id").value("3"))
+                .andExpect(jsonPath("itineraire.[2].id").value("1"))
+                .andExpect(jsonPath("itineraire.[3].id").value("2"))
+                .andExpect(jsonPath("itineraire.[4].id").value("4"))
+                .andExpect(jsonPath("itineraire.[5].id").value("-2"));
+    }
+
+    @Test
+    @Order(60)
     void SupprimerUtilisateurTest() throws Exception{
         MvcResult result = mockMvc.perform(get(BASE_API_UTILISATEUR +"connexion")
                         .param("mail", "testetestetest@gmail.com")
@@ -403,7 +614,7 @@ class TestIntegration {
                 .andExpect(status().isOk());
     }
 
-    public void creationClientAModifier() throws Exception {
+    private void creationClientAModifier() throws Exception {
         MvcResult result = mockMvc.perform(post(ROUTE_API).header("Authorization", "Bearer " + con.get("token"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CLIENT_AVANT_MODIF))
@@ -413,5 +624,31 @@ class TestIntegration {
         JSONObject client = new JSONObject(result.getResponse().getContentAsString());
 
         id = client.optLong("id");
+    }
+
+    private void ajouterClient() throws Exception {
+        mockMvc.perform(post(ROUTE_API).header("Authorization", "Bearer " + con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CLIENT_ITINERAIRE_1))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        mockMvc.perform(post(ROUTE_API).header("Authorization", "Bearer " + con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CLIENT_ITINERAIRE_2))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        mockMvc.perform(post(ROUTE_API).header("Authorization", "Bearer " + con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CLIENT_ITINERAIRE_3))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        mockMvc.perform(post(ROUTE_API).header("Authorization", "Bearer " + con.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CLIENT_ITINERAIRE_4))
+                .andExpect(status().isCreated())
+                .andReturn();
     }
 }

@@ -32,9 +32,11 @@ import java.util.LinkedHashMap;
 @Getter
 public class ItineraireDTO {
 
+    @NotNull(message = "Le domicile doit être renseigné")
     private Point domicile;
     
     @Size(max = 50, message = "Le nom de l'itinéraire ne doit pas dépasser 50 caractères")
+    @NotNull(message = "L'itinéraire doit avoir un nom")
     private String nomItineraire;
 
     @NotNull(message = "La liste des clients ordonnée est obligatoire")
