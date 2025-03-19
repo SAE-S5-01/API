@@ -5,18 +5,22 @@
 
 package fr.iutrodez.sae501.apicliandcollect.parcours;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.lang.Nullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Setter
@@ -36,6 +40,9 @@ public class ParcoursDTO {
     private String idItineraire;
 
     private Long idDernierContactVisite = null;
+
+    @JsonDeserialize(contentUsing = ParserGeoJson.class)
+    private GeoJsonPoint[] precedentesPositionGps;
 
     /**
      * Annotation pour valider le statut d'un parcours

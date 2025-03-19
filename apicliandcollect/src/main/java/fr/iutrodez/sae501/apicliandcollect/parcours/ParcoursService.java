@@ -27,6 +27,8 @@ public class ParcoursService {
 
     @Autowired
     private InteractionMongoItineraire interactionMongoItineraire;
+    @Autowired
+    private InterractionMongoParcours interractionMongoParcours;
 
     /**
      * Récupère la liste des parcours de l'utilisateur u
@@ -81,8 +83,12 @@ public class ParcoursService {
         }
 
         parcours.setUtilisateur(u);
-        Parcours resultat = interactionBdParcours.save(parcours);
-
+        Parcours resultat = null;
+        try {
+            resultat = interactionBdParcours.save(parcours);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return parcoursEnJson(resultat);
     }
 
@@ -104,6 +110,16 @@ public class ParcoursService {
 
         if (parcoursModifie.getIdDernierContactVisite() != null) {
             parcours.setDernierContactVisite(interactionBdContact.findById(parcoursModifie.getIdDernierContactVisite()).get());
+        }
+        if (parcoursModifie.getPrecedentesPositionGps() != null ) {
+
+            ParcoursMongo parcoursModifieMongo = interractionMongoParcours.findByIdParcours(parcours.getId());
+            if (parcoursModifieMongo == null) {
+                parcoursModifieMongo = new ParcoursMongo();
+            }
+            parcoursModifieMongo.setIdParcours(parcours.getId());
+            parcoursModifieMongo.setPrecedentesPositionsGps(parcoursModifie.getPrecedentesPositionGps());
+            interractionMongoParcours.save(parcoursModifieMongo);
         }
         interactionBdParcours.save(parcours);
     }
