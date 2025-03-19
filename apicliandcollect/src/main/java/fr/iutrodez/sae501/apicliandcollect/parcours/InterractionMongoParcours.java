@@ -9,4 +9,6 @@ public interface InterractionMongoParcours extends MongoRepository<ParcoursMongo
     void deleteBy_id(String id);
 
     ParcoursMongo findByIdParcours(Long id);
+
+    void deleteByIdParcours(Long id);
 }

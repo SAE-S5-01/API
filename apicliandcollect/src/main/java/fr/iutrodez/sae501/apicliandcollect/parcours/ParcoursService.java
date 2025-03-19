@@ -154,6 +154,9 @@ public class ParcoursService {
         if (parcoursModifie.getPositionsGpsPrecedentes() != null ) {
 
             ParcoursMongo parcoursModifieMongo = interractionMongoParcours.findByIdParcours(parcours.getId());
+            if (parcoursModifieMongo == null) {
+                parcoursModifieMongo = new ParcoursMongo();
+            }
             parcoursModifieMongo.setIdParcours(parcours.getId());
             parcoursModifieMongo.setPrecedentesPositionsGps(parcoursModifie.getPositionsGpsPrecedentes());
             interractionMongoParcours.save(parcoursModifieMongo);
@@ -169,6 +172,7 @@ public class ParcoursService {
     @Transactional
     public void supprimerParcours(Utilisateur u, Long id) {
         interactionBdParcours.deleteByUtilisateurAndId(u, id);
+        interractionMongoParcours.deleteByIdParcours(id);
     }
 
     /**
