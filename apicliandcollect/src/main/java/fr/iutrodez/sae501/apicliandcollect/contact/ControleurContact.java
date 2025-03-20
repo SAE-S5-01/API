@@ -46,15 +46,32 @@ public class ControleurContact {
     }
 
     /**
+     * Récupère la liste des contacts proches de l'utilisateur connecté.
+     * @param id L'identifiant du client à vérifier
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
+     * @param utilisateur L'utilisateur connecté
+     * @return Une entité de réponse contenant la liste des contacts proches de l'utilisateur
+     */
+    @GetMapping("/contact/{id}/proche")
+    public ResponseEntity<List<ContactDTO>> obtenirContactsProches(@PathVariable Long id, @RequestParam double longitude,
+                                                                   @RequestParam double latitude, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        return new ResponseEntity<>(service.getContactsProches(id, longitude, latitude, u), HttpStatus.OK);
+    }
+
+    /**
      * Récupère la liste des prospects proches de l'utilisateur connecté.
      * @param longitude La longitude à comparer
      * @param latitude La latitude à comparer
+     * @param utilisateur L'utilisateur connecté
      * @return Une entité de réponse contenant la liste des prospects proches de l'utilisateur
      */
     @GetMapping("/contact/prospect/proche")
     public ResponseEntity<List<ContactDTO>> obtenirProspectsProches(@RequestParam double longitude,
-                                                                    @RequestParam double latitude) {
-        return new ResponseEntity<>(service.getProspectsProches(longitude, latitude), HttpStatus.OK);
+                                                                    @RequestParam double latitude, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        return new ResponseEntity<>(service.getProspectsProches(longitude, latitude, u), HttpStatus.OK);
     }
 
     /**

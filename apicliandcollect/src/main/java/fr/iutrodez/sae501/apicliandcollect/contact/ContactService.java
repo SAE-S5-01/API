@@ -7,7 +7,6 @@ package fr.iutrodez.sae501.apicliandcollect.contact;
 
 import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.itineraire.Itineraire;
-import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionMongoUtilisateur;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,20 +128,55 @@ public class ContactService {
     }
 
     /**
+     * Récupère la liste des contacts proches de l'utilisateur
+     * @param idClient L'id du client à vérifier
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
+     * @param utilisateur L'utilisateur connecté
+     * @return La liste des contacts proches
+     */
+    public List<ContactDTO> getContactsProches(long idClient, double longitude, double latitude, Utilisateur utilisateur) {
+        GeoJsonPoint localisation = new GeoJsonPoint(longitude, latitude);
+
+        List<ContactMongo> prospectsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
+
+        // Filtre les prospects appartenant à l'utilisateur
+        List<ContactDTO> contactsProches = prospectsProches.stream()
+            .map(prospect -> interactionBdContact.findById(prospect.get_id()).orElse(null))
+            .filter(contact -> contact != null && contact.isProspect() && contact.getUtilisateur().getId().equals(utilisateur.getId()))
+            .map(contact -> contactEnJson(contact, interactionMongoContact.findBy_id(contact.getId())))
+            .collect(Collectors.toList());
+
+        // Vérification de la proximité du client spécifié
+        List<ContactMongo> clientsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_CLIENT_PROCHE);
+        boolean clientProche = clientsProches.stream().anyMatch(client -> client.get_id() == idClient);
+
+        if (clientProche) {
+            Contact client = interactionBdContact.findById(idClient).orElse(null);
+            if (client != null && !client.isProspect()) {
+                ContactMongo clientLocalisation = interactionMongoContact.findBy_id(client.getId());
+                contactsProches.add(contactEnJson(client, clientLocalisation));
+            }
+        }
+
+        return contactsProches;
+    }
+
+    /**
      * Récupère la liste des prospects à moins de 1000m de l'utilisateur.
      * @param longitude La longitude à comparer
      * @param latitude La latitude à comparer
+     * @param utilisateur L'utilisateur connecté
      * @return La liste des prospects proches
      */
-    public List<ContactDTO> getProspectsProches(double longitude, double latitude) {
+    public List<ContactDTO> getProspectsProches(double longitude, double latitude, Utilisateur utilisateur) {
         GeoJsonPoint localisation = new GeoJsonPoint(longitude, latitude);
 
-        List<ContactMongo> prospectsProches
-        = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
+        List<ContactMongo> prospectsProches = interactionMongoContact.findByLocationNear(localisation, DISTANCE_PROSPECT_PROCHE);
 
         return prospectsProches.stream()
-            .map(prospect -> interactionBdContact.findById(prospect.get_id()).get())
-            .filter(Contact::isProspect)  // Vérifie que le contact est bien un prospect
+            .map(prospect -> interactionBdContact.findById(prospect.get_id()).orElse(null))
+            .filter(contact -> contact != null && contact.isProspect() && contact.getUtilisateur().getId().equals(utilisateur.getId()))
             .map(contact -> contactEnJson(contact, interactionMongoContact.findBy_id(contact.getId())))
             .collect(Collectors.toList());
     }
