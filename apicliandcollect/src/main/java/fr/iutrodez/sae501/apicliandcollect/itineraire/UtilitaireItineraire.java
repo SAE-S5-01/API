@@ -24,14 +24,19 @@ import com.google.gson.JsonObject;
 @Component
 public class UtilitaireItineraire {
 
+    private static String API_ORS_URL;
     private static String API_ORS_TOKEN;
+
+    @Value("${api.ors.url}")
+    public void setApiOrsUrl(String url) {
+        API_ORS_URL = url;
+    }
 
     @Value("${api.ors.token}")
     public void setApiOrsToken(String token) {
         API_ORS_TOKEN = token;
     }
 
-    private static final String MATRIX_URL = "https://api.openrouteservice.org/v2/matrix/driving-car";
     private static final RestTemplate restTemplate = new RestTemplate();
 
     public static LinkedHashMap<Long, Point> CalculeItineraireGlouton(LinkedHashMap<Long, Point> listeClient){
@@ -155,7 +160,7 @@ public class UtilitaireItineraire {
 
             // Exécuter la requête
             ResponseEntity<String> response = restTemplate.exchange(
-                    MATRIX_URL, HttpMethod.POST, requestEntity, String.class
+                API_ORS_URL, HttpMethod.POST, requestEntity, String.class
             );
 
             // Vérifier la réponse
