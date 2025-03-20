@@ -64,6 +64,8 @@ jobs:
           echo "SERVER_SERVLET_ENCODING_CHARSET=${{ secrets.SERVER_SERVLET_ENCODING_CHARSET }}" >> .env
           echo "SERVER_SERVLET_ENCODING_ENABLED=${{ secrets.SERVER_SERVLET_ENCODING_ENABLED }}" >> .env
           echo "SERVER_SERVLET_ENCODING_FORCE=${{ secrets.SERVER_SERVLET_ENCODING_FORCE }}" >> .env
+          echo "API_ORS_URL=${{ vars.API_ORS_URL }}" >> .env
+          echo "API_ORS_TOKEN=${{ secrets.API_ORS_TOKEN }}" >> .env
 
       - name: Copier les fichiers nécessaires vers le serveur
         # Transfère les fichiers requis pour le déploiement vers le serveur distant
