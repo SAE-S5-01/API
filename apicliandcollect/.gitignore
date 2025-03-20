@@ -34,4 +34,4 @@ build/
 
 HELP.md
 mvnw*
-application.properties
+src/main/resources/application.properties

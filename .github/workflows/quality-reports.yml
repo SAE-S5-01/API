@@ -72,7 +72,9 @@ jobs:
         run: |
           echo "security.jwt.secret-key=${{ secrets.SECURITY_JWT_SECRET_KEY }}" > apicliandcollect/src/test/resources/application-test.properties
           echo "security.jwt.expiration-time=${{ secrets.SECURITY_JWT_EXPIRATION_TIME }}" >> apicliandcollect/src/test/resources/application-test.properties
-      # Utilise les secrets stockés dans GitHub (par exemple, `SECURITY_JWT_SECRET_KEY`) pour remplir les informations de configuration sensibles nécessaires pour les tests
+          echo "api.ors.url=${{ vars.API_ORS_URL }}" >> apicliandcollect/src/test/resources/application-test.properties
+          echo "api.ors.token=${{ secrets.API_ORS_TOKEN }}" >> apicliandcollect/src/test/resources/application-test.properties
+        # Utilise les secrets stockés dans GitHub (par exemple, `SECURITY_JWT_SECRET_KEY`) pour remplir les informations de configuration sensibles nécessaires pour les tests
       
       - name: Exécution des tests et génération du rapport JaCoCo
         run: mvn -B test jacoco:report -f apicliandcollect/pom.xml # Utilise Maven pour exécuter les tests (option `-B` pour "batch" et exécuter sans interaction utilisateur) et génère un rapport JaCoCo pour mesurer la couverture de code

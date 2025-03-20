@@ -6,9 +6,9 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.contact.InteractionBdContact;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.InteractionBdUtilisateur;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Point;
@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static fr.iutrodez.sae501.apicliandcollect.itineraire.UtilitaireItineraire.*;
 
 @Service
 public class ItineraireService {
@@ -29,12 +31,17 @@ public class ItineraireService {
     @Autowired
     private InteractionBdContact interactionBdContact;
 
-
-    // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
-    public String calculerItineraire(
-            LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
-        LinkedHashMap<String , Point> listeClientsFormatte = new LinkedHashMap<>();
-        return formattageItineraire(listeClients);
+    public String calculerItineraire(LinkedHashMap<Long, Point> listeClients, Point domicile) throws JsonProcessingException {
+        List<List<Long>> permutations = genererPermutations(new ArrayList<>(listeClients.keySet()));
+        listeClients.put(-1L, domicile); // ajout du domicile à la fin de la map
+        Double[][] distances = genererDistance(new ArrayList<>(listeClients.values()));
+        Map<Long , Integer> indexClient = genererIndexClient(listeClients);
+        List<Long> cheminOptimise = forceBrut(indexClient , permutations , distances);
+        LinkedHashMap<Long, Point> listeClientsOrdonnee = new LinkedHashMap<>();
+        for (Long id : cheminOptimise) {
+            listeClientsOrdonnee.put(id, listeClients.get(id));
+        }
+        return formattageItineraire(listeClientsOrdonnee , domicile);
     }
 
     /**
@@ -44,8 +51,7 @@ public class ItineraireService {
      * @return L'itinéraire créé
      * @throws JsonProcessingException Erreur de formatage JSON
      */
-    public String creerItineraire(long idCreateur , ListeClientDTO itineraire) throws JsonProcessingException {
-
+    public String creerItineraire(long idCreateur, ItineraireDTO itineraire) throws JsonProcessingException {
         Collection<Point> listeCoordonne = itineraire.getListePoint().values();
         String nomItineraire = itineraire.getNomItineraire();
 
@@ -70,6 +76,37 @@ public class ItineraireService {
         return formattageItineraire(insertion);
     }
 
+    /**
+     * Modifie un itinéraire
+     * @param idCreateur ID de l'utilisateur modifiant l'itinéraire
+     * @param id ID de l'itinéraire à modifier
+     * @param itineraire Objet contenant les nouvelles informations de l'itinéraire
+     * @return L'itinéraire modifié
+     * @throws JsonProcessingException Erreur de formatage JSON
+     */
+    public String modifierItineraire(long idCreateur, String id, ItineraireDTO itineraire) throws JsonProcessingException {
+        Itineraire itineraireAModifier = interactionMongoItineraire.findBy_idAndIdCreateur(id, idCreateur);
+        if (itineraireAModifier == null) {
+            throw new IllegalArgumentException("L'itinéraire n'existe pas");
+        }
+
+        Collection<Point> listeCoordonne = itineraire.getListePoint().values();
+        String nomItineraire = itineraire.getNomItineraire();
+
+        if (nomItineraire != null) {
+            itineraireAModifier.setNomItineraire(nomItineraire);
+        }
+
+        ArrayList<Long> listeContact = new ArrayList<>(itineraire.getListePoint().keySet());
+        itineraireAModifier.setListeIdContact(listeContact);
+
+        GeoJsonLineString geoJsonLineString = new GeoJsonLineString(new ArrayList<>(listeCoordonne));
+        itineraireAModifier.setLineStringCoordonnees(geoJsonLineString);
+
+        interactionMongoItineraire.save(itineraireAModifier);
+        return formattageItineraire(itineraireAModifier);
+    }
+
     /** 
      * Supprime le contact d'id id
      * @param id l'id du contact à supprimer
@@ -77,7 +114,7 @@ public class ItineraireService {
     public void supprimerItineraire(Utilisateur u, String id) {
         Itineraire itineraire = interactionMongoItineraire.findBy_idAndIdCreateur(id, u.getId());
         interactionMongoItineraire.delete(itineraire);
-        // TODO : vérifier si besoin suppression autre...
+        // TODO : action pour parcours associé ??
     }
 
     /**
@@ -113,26 +150,22 @@ public class ItineraireService {
      * @return La liste des étapes formatée en JSON
      * @throws JsonProcessingException
      */
-    public String formattageItineraire(LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
+    public String formattageItineraire(LinkedHashMap<Long, Point> listeClients , Point domicile) throws JsonProcessingException {
         ArrayList<ListeEtapesItineraireSerializer> itineraireList = new ArrayList<>();
-        // Le domicile est une étape mais non un CONTACT d'où l'id "bidon"
-        Point domicile = listeClients.get(-1L);
 
         // Ajouter le point de départ
         itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Départ", domicile.getY(), domicile.getX()));
 
-        // Enlever le domicile de la liste pour éviter une null pointer dans la boucle
-        listeClients.remove(-1L);
 
         // Ajouter les clients avec leurs ID
         for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
             Long id = entry.getKey();
             Point point = entry.getValue();
-            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
+            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findEntrepriseById(id), point.getY(), point.getX()));
         }
 
         // Ajouter le point d'arrivée
-        itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Arrivée", domicile.getY(), domicile.getX()));
+        itineraireList.add(new ListeEtapesItineraireSerializer(-2L, "Arrivée", domicile.getY(), domicile.getX()));
 
         // Convertir la liste en JSON et l'encapsuler dans un objet
         ObjectMapper objectMapper = new ObjectMapper();

@@ -15,7 +15,6 @@ public class ListeEtapesItineraireSerializer {
     @JsonProperty("id")
     private Long id;
 
-
     @JsonProperty("nom")
     private String nom;
 
@@ -24,8 +23,6 @@ public class ListeEtapesItineraireSerializer {
 
     @JsonProperty("longitude")
     private double longitude;
-
-
 
     /**
      * Constructeur de la classe ItineraireToApp pour un point

@@ -1,5 +1,6 @@
 package fr.iutrodez.sae501.apicliandcollect.contact;
 
+import fr.iutrodez.sae501.apicliandcollect.itineraire.InteractionMongoItineraire;
 import fr.iutrodez.sae501.apicliandcollect.utilisateur.Utilisateur;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -30,6 +32,9 @@ class ContactServiceTest {
 
     @Mock
     private InteractionMongoContact interactionMongoContact;
+
+    @Mock
+    private InteractionMongoItineraire interactionMongoItineraire;
 
     @Mock
     private Contact contact;
@@ -47,7 +52,6 @@ class ContactServiceTest {
 
     private Contact contactSQL;
 
-
     @BeforeEach
     public void setUp() {
         // Initialisation des données pour les tests
@@ -62,7 +66,6 @@ class ContactServiceTest {
         contactDTO.setLongitude(2.294481);
 
         contactService = new ContactService();
-
         utilisateur = new Utilisateur();
 
         contactSQL = new Contact();
@@ -76,13 +79,8 @@ class ContactServiceTest {
         contactSQL.setUtilisateur(utilisateur);
 
         id = 1L;
-        //utilisateur.setId(1L);
 
         MockitoAnnotations.initMocks(this);
-    }
-
-    private long simulationSauvegarde() {
-        return id;
     }
 
     @Test
@@ -124,7 +122,7 @@ class ContactServiceTest {
     }
 
     @Test
-    void modifierContact(){
+    void modifierContact() {
         ContactDTO contactModifier = new ContactDTO();
         contactModifier.setNomEntreprise("Nom entreprise de Test");
         contactModifier.setAdresse("Adresse de test");
@@ -135,26 +133,40 @@ class ContactServiceTest {
         contactModifier.setLongitude(1.851270);
         contactModifier.setLatitude(42.788370);
 
-        List<Contact> contactEnBD = new ArrayList<>();
-        contactEnBD.add(contactSQL);
-
         contactMongo = new ContactMongo();
         contactMongo.set_id(id);
         contactMongo.setLocation(new GeoJsonPoint(contactDTO.getLongitude(), contactDTO.getLatitude()));
 
         when(interactionMongoContact.findBy_id(Mockito.any(Long.class))).thenReturn(contactMongo);
-        when(interactionBdContact.findByUtilisateurAndId(Mockito.any(Utilisateur.class),Mockito.any(Long.class))).thenReturn(contactEnBD);
+        when(interactionBdContact.findByUtilisateurAndId(Mockito.any(Utilisateur.class),Mockito.any(Long.class))).thenReturn(contactSQL);
 
         contactService.modifierContact(contactModifier,utilisateur,id);
-        Contact result = contactEnBD.getFirst();
-        assertEquals(contactModifier.getNomEntreprise(),result.getEntreprise());
-        assertEquals(contactModifier.getAdresse(), result.getAdresse());
-        assertEquals(contactModifier.getNomContact(),result.getNom());
-        assertEquals(contactModifier.getPrenomContact(),result.getPrenom());
-        assertEquals(contactModifier.getTelephone(), result.getTelephone());
-        assertEquals(contactModifier.getDescription(), result.getDescription());
+        assertEquals(contactModifier.getNomEntreprise(),contactSQL.getEntreprise());
+        assertEquals(contactModifier.getAdresse(), contactSQL.getAdresse());
+        assertEquals(contactModifier.getNomContact(),contactSQL.getNom());
+        assertEquals(contactModifier.getPrenomContact(),contactSQL.getPrenom());
+        assertEquals(contactModifier.getTelephone(), contactSQL.getTelephone());
+        assertEquals(contactModifier.getDescription(), contactSQL.getDescription());
         assertEquals(contactModifier.getLongitude(),contactMongo.getLocation().getX());
         assertEquals(contactModifier.getLatitude(), contactMongo.getLocation().getY());
+    }
+
+    @Test
+    void supprimerContact() {
+        // Simuler la récupération du contact
+        Contact contact = new Contact();
+        contact.setId(id);
+        when(interactionBdContact.findByUtilisateurAndId(utilisateur, id)).thenReturn(contact);
+
+        doNothing().when(interactionBdContact).delete(contact);
+        doNothing().when(interactionMongoContact).deleteBy_id(id);
+        doNothing().when(interactionMongoItineraire).deleteByIdCreateur(id);
+
+        contactService.supprimerContact(utilisateur, id);
+
+        verify(interactionBdContact, times(1)).delete(contact);
+        verify(interactionMongoContact, times(1)).deleteBy_id(id);
+        verify(interactionMongoItineraire, times(1)).deleteByIdContact(id);
     }
 
 }

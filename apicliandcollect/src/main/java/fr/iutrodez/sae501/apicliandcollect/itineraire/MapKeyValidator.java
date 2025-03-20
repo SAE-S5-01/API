@@ -1,5 +1,5 @@
 /*
- * MapKeyValidator.java                                                                                     04 fev. 2025
+ * MapKeyValidator.java                                  14 fev. 2025
  * IUT de Rodez, pas de copyright ni de "copyleft".
  */
 
@@ -15,7 +15,9 @@ import java.util.Map;
 
 /**
  * Méthode de validation pour l'annotation MapKeyValidator
- * @author Descriaud Lucas
+ *
+ * @author Loïc FAUGIERES
+ * @author Lucas DESCRIAUD
  */
 public class MapKeyValidator implements ConstraintValidator<ValidateMap, Map<Long, Point>> {
 

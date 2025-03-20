@@ -8,7 +8,10 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,7 +32,8 @@ public class UtilisateurDTO {
     @NotBlank(message = "Votre email est obligatoire")
     @Email(message = "Adresse email non valide : ex. johndoe@gmail.com")
     @Size(max = 200, message = "Votre email ne peut pas contenir plus de 200 caractères")
-    @UniqueEmail
+    @UniqueEmail(groups = GroupValidationDTO.CreationUtilisateur.class)
+    @ModificationEmail(groups = GroupValidationDTO.ModificationUtilisateur.class)
     private String mail;
 
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W.-])[A-Za-z\\d\\W.-]{8,50}$",
@@ -51,11 +55,26 @@ public class UtilisateurDTO {
     @Min(message = "La latitude ne peut pas être en dessous de -90°", value = -90)
     private double latitude;
 
+    /** Ajouter une validation pour vérifier que les coordonnées ne sont pas égales à 0.0 */
+    @AssertTrue(message = "La longitude et la latitude ne peuvent pas être égales à 0.0")
+    public boolean isCoordinatesValid() {
+        return longitude != 0.0 && latitude != 0.0;
+    }
+
     @Constraint(validatedBy = EmailUniqueValidator.class)
     @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
     @Retention(RetentionPolicy.RUNTIME)
     public @interface UniqueEmail {
-        String message() default "Mail déjà utilisé";
+        String message() default "Adresse mail déjà utilisé";
+        Class<?>[] groups() default {};
+        Class<? extends Payload>[] payload() default {};
+    }
+
+    @Constraint(validatedBy = EmailModificationValidator.class)
+    @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ModificationEmail {
+        String message() default "Adresse mail déjà utilisé";
         Class<?>[] groups() default {};
         Class<? extends Payload>[] payload() default {};
     }
@@ -68,6 +87,20 @@ public class UtilisateurDTO {
         @Override
         public boolean isValid(String mail, ConstraintValidatorContext context) {
             return mail != null && !interactionBdUtilisateur.existsByMail(mail);
+        }
+    }
+
+    @Component
+    public static class EmailModificationValidator implements ConstraintValidator<ModificationEmail, String> {
+        @Autowired
+        private InteractionBdUtilisateur interactionBdUtilisateur;
+
+        @Override
+        public boolean isValid(String mail, ConstraintValidatorContext context) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String mailUtilisateurConnecte =  authentication.getName();
+
+            return !interactionBdUtilisateur.existsByMail(mail) || mail.equals(mailUtilisateurConnecte);
         }
     }
 }

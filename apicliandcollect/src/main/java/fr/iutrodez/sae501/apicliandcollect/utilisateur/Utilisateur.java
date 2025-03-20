@@ -40,16 +40,6 @@ public class Utilisateur implements UserDetails {
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contact> clients = new ArrayList<>();
 
-    public void ajouterClient(Contact contact) {
-        clients.add(contact);
-        contact.setUtilisateur(this);
-    }
-
-    public void supprimerClient(Contact contact) {
-        clients.remove(contact);
-        contact.setUtilisateur(null);
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
