@@ -15,10 +15,9 @@ import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+
+import static fr.iutrodez.sae501.apicliandcollect.itineraire.UtilitaireItineraire.*;
 
 @Service
 public class ItineraireService {
@@ -32,12 +31,17 @@ public class ItineraireService {
     @Autowired
     private InteractionBdContact interactionBdContact;
 
-
-    // TODO appel de la classe utilitaire ou seront stockes les methodes de calcul d'itineraire
-    public String calculerItineraire(LinkedHashMap<Long, Point> listeClients)
-        throws JsonProcessingException {
-        LinkedHashMap<String , Point> listeClientsFormatte = new LinkedHashMap<>();
-        return formattageItineraire(listeClients);
+    public String calculerItineraire(LinkedHashMap<Long, Point> listeClients, Point domicile) throws JsonProcessingException {
+        List<List<Long>> permutations = genererPermutations(new ArrayList<>(listeClients.keySet()));
+        listeClients.put(-1L, domicile); // ajout du domicile à la fin de la map
+        Double[][] distances = genererDistance(new ArrayList<>(listeClients.values()));
+        Map<Long , Integer> indexClient = genererIndexClient(listeClients);
+        List<Long> cheminOptimise = forceBrut(indexClient , permutations , distances);
+        LinkedHashMap<Long, Point> listeClientsOrdonnee = new LinkedHashMap<>();
+        for (Long id : cheminOptimise) {
+            listeClientsOrdonnee.put(id, listeClients.get(id));
+        }
+        return formattageItineraire(listeClientsOrdonnee , domicile);
     }
 
     /**
@@ -146,26 +150,22 @@ public class ItineraireService {
      * @return La liste des étapes formatée en JSON
      * @throws JsonProcessingException
      */
-    public String formattageItineraire(LinkedHashMap<Long, Point> listeClients) throws JsonProcessingException {
+    public String formattageItineraire(LinkedHashMap<Long, Point> listeClients , Point domicile) throws JsonProcessingException {
         ArrayList<ListeEtapesItineraireSerializer> itineraireList = new ArrayList<>();
-        // Le domicile est une étape mais non un CONTACT d'où l'id "bidon"
-        Point domicile = listeClients.get(-1L);
 
         // Ajouter le point de départ
         itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Départ", domicile.getY(), domicile.getX()));
 
-        // Enlever le domicile de la liste pour éviter une null pointer dans la boucle
-        listeClients.remove(-1L);
 
         // Ajouter les clients avec leurs ID
         for (Map.Entry<Long, Point> entry : listeClients.entrySet()) {
             Long id = entry.getKey();
             Point point = entry.getValue();
-            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findNameById(id), point.getY(), point.getX()));
+            itineraireList.add(new ListeEtapesItineraireSerializer(id, interactionBdContact.findEntrepriseById(id), point.getY(), point.getX()));
         }
 
         // Ajouter le point d'arrivée
-        itineraireList.add(new ListeEtapesItineraireSerializer(-1L, "Arrivée", domicile.getY(), domicile.getX()));
+        itineraireList.add(new ListeEtapesItineraireSerializer(-2L, "Arrivée", domicile.getY(), domicile.getX()));
 
         // Convertir la liste en JSON et l'encapsuler dans un objet
         ObjectMapper objectMapper = new ObjectMapper();

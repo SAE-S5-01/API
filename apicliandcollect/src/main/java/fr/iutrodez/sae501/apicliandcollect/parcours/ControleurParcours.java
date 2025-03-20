@@ -23,6 +23,8 @@ public class ControleurParcours {
 
     private final static String SUCCES_MODIFICATION = "Parcours modifié avec succès";
 
+    private final static String SUCCES_SUPPRESSION = "Parcours supprimé avec succès";
+
     @Autowired
     ParcoursService service;
 
@@ -34,11 +36,17 @@ public class ControleurParcours {
      */
     @GetMapping("/parcours")
     public ResponseEntity<?> obtenirParcours(Authentication Utilisateur,
-                                                             @RequestParam(required = true) String statut) {
+                                             @RequestParam(required = false) String statut) {
         try {
-            StatutParcours statutEnum = StatutParcours.valueOf(statut);
             Utilisateur u = (Utilisateur) Utilisateur.getPrincipal();
-            List<ParcoursDTO> parcours = service.listeParcours(u, statutEnum);
+            List<ParcoursDTO> parcours = null;
+
+            if (statut != null) {
+                StatutParcours statutEnum = StatutParcours.valueOf(statut);
+                parcours = service.listeParcours(u, statutEnum);
+            } else {
+                parcours = service.listeParcours(u);
+            }
             return new ResponseEntity<>(parcours, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(
@@ -76,5 +84,18 @@ public class ControleurParcours {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
         service.modifierParcours(parcoursModifie, u, id);
         return new ResponseEntity<>(new ReponseTextuelle(SUCCES_MODIFICATION), HttpStatus.OK);
+    }
+
+    /**
+     * Supprime un parcours de l'utilisateur connecté
+     * @param id L'identifiant du parcours à supprimer (passé dans l'URL)
+     * @param utilisateur L'utilisateur connecté
+     * @return Un message de succès
+     */
+    @DeleteMapping("/parcours/{id}")
+    public ResponseEntity<ReponseTextuelle> supprimerParcours(@PathVariable Long id, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        service.supprimerParcours(u, id);
+        return new ResponseEntity<>(new ReponseTextuelle(SUCCES_SUPPRESSION), HttpStatus.OK);
     }
 }

@@ -9,3 +9,5 @@ security.jwt.expiration-time=
 server.servlet.encoding.charset=UTF-8
 server.servlet.encoding.enabled=true
 server.servlet.encoding.force=true
+api.ors.url=https://api.openrouteservice.org/v2/matrix/driving-car
+api.ors.token=

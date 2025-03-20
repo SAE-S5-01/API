@@ -46,22 +46,45 @@ public class ControleurContact {
     }
 
     /**
+     * Récupère la liste des contacts proches de l'utilisateur connecté.
+     * @param id L'identifiant du client à vérifier
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
+     * @param utilisateur L'utilisateur connecté
+     * @return Une entité de réponse contenant la liste des contacts proches de l'utilisateur
+     */
+    @GetMapping("/contact/{id}/proche")
+    public ResponseEntity<List<ContactDTO>> obtenirContactsProches(@PathVariable Long id, @RequestParam double longitude,
+                                                                   @RequestParam double latitude, Authentication utilisateur) {
+        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
+        return new ResponseEntity<>(service.getContactsProches(id, longitude, latitude, u), HttpStatus.OK);
+    }
+
+    /**
      * Récupère la liste des prospects proches de l'utilisateur connecté.
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
      * @param utilisateur L'utilisateur connecté
      * @return Une entité de réponse contenant la liste des prospects proches de l'utilisateur
      */
     @GetMapping("/contact/prospect/proche")
-    public ResponseEntity<List<ContactDTO>> obtenirProspectsProches(Authentication utilisateur) {
+    public ResponseEntity<List<ContactDTO>> obtenirProspectsProches(@RequestParam double longitude,
+                                                                    @RequestParam double latitude, Authentication utilisateur) {
         Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
-        List<ContactDTO> contact = service.getProspectsProches(u);
-        return new ResponseEntity<>(contact, HttpStatus.OK);
+        return new ResponseEntity<>(service.getProspectsProches(longitude, latitude, u), HttpStatus.OK);
     }
 
+    /**
+     * Vérifie si un client est proche de l'utilisateur connecté.
+     * @param id L'identifiant du client
+     * @param longitude La longitude à comparer
+     * @param latitude La latitude à comparer
+     * @return Une entité de réponse indiquant si le client est proche ou non
+     */
     @GetMapping("/contact/client/{id}/proche")
-    public ResponseEntity<ReponseEstProche> estClientProche(@PathVariable Long id, Authentication utilisateur) {
-        Utilisateur u = (Utilisateur) utilisateur.getPrincipal();
-
-        return new ResponseEntity<>(new ReponseEstProche(service.isClientProche(u, id)),
+    public ResponseEntity<ReponseEstProche> estClientProche(@PathVariable Long id, @RequestParam double longitude,
+                                                            @RequestParam double latitude) {
+        return new ResponseEntity<>(new ReponseEstProche(service.isClientProche(id, longitude, latitude)),
                                     HttpStatus.OK);
     }
 

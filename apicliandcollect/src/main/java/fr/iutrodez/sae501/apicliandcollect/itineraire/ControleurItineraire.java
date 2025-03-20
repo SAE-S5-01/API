@@ -22,8 +22,6 @@ import java.util.LinkedHashMap;
 @RequestMapping("/api")
 public class    ControleurItineraire {
 
-    private static final String SUCCES_MODIFICATION = "Itinéraire modifié avec succès";
-
     private static final String SUCCES_SUPPRESSION = "Itinéraire supprimé avec succès";
 
     @Autowired
@@ -43,8 +41,7 @@ public class    ControleurItineraire {
         /*
          * Ajout du domicile en premier élément de la liste , id -1 car sera retiré plus tard.
          */
-        liste.putFirst(-1L, listePoint.getDomicile());
-        String itineraireCalcule = itineraireService.calculerItineraire(liste);
+        String itineraireCalcule = itineraireService.calculerItineraire(liste , listePoint.getDomicile());
         return new ResponseEntity<>(itineraireCalcule, HttpStatus.OK);
 
     }
