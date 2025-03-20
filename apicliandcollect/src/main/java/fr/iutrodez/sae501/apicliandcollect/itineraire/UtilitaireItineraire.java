@@ -6,10 +6,12 @@
 package fr.iutrodez.sae501.apicliandcollect.itineraire;
 
 import com.google.gson.JsonParser;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.geo.Point;
 import org.springframework.data.util.Pair;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import com.google.gson.JsonArray;
@@ -19,11 +21,16 @@ import com.google.gson.JsonObject;
  * Calcul d'itineraire
  * @author Descriaud Lucas
  */
+@Component
 public class UtilitaireItineraire {
 
-    //TODO a deplacer dans properties
-    private static final String API_KEY = "5b3ce3597851110001cf6248e319034bfeca4b95ba9290a1113f74db";
-    // TODO : idem au dessus ?
+    private static String API_ORS_TOKEN;
+
+    @Value("${api.ors.token}")
+    public void setApiOrsToken(String token) {
+        API_ORS_TOKEN = token;
+    }
+
     private static final String MATRIX_URL = "https://api.openrouteservice.org/v2/matrix/driving-car";
     private static final RestTemplate restTemplate = new RestTemplate();
 
@@ -142,7 +149,7 @@ public class UtilitaireItineraire {
             // Création des headers HTTP
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", API_KEY);
+            headers.set("Authorization", API_ORS_TOKEN);
 
             HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody.toString(), headers);
 
